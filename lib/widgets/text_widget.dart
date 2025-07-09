@@ -28,7 +28,7 @@ class TextWidget extends StatelessWidget {
     return Text(
       text,
       textAlign: align,
-      maxLines: maxLines,
+      maxLines: 20,
       style: TextStyle(
           letterSpacing: 0,
           overflow: TextOverflow.ellipsis,

@@ -1,14 +1,16 @@
-import 'package:autour_mobile/screens/auth/login_screen.dart';
+import 'package:autour_mobile/screens/home_screens/qrcode.pass_screen.dart';
+import 'package:autour_mobile/screens/home_screens/tourism.guide_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:autour_mobile/utils/colors.dart';
+import 'package:autour_mobile/widgets/text_widget.dart';
+import 'package:autour_mobile/widgets/button_widget.dart';
 import 'package:autour_mobile/screens/home_screens/chatbot_screen.dart';
 import 'package:autour_mobile/screens/home_screens/community_screen.dart';
 import 'package:autour_mobile/screens/home_screens/disaster.preparedness_screen.dart';
 import 'package:autour_mobile/screens/home_screens/local.businesses_screen.dart';
 import 'package:autour_mobile/screens/home_screens/travel.planner_screen.dart';
 import 'package:autour_mobile/widgets/logout_widget.dart';
-import 'package:flutter/material.dart';
-import 'package:autour_mobile/utils/colors.dart';
-import 'package:autour_mobile/widgets/text_widget.dart';
-import 'package:autour_mobile/widgets/button_widget.dart';
+import 'package:autour_mobile/screens/auth/login_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -33,9 +35,7 @@ class HomeScreen extends StatelessWidget {
             onPressed: () {
               logout(context, LoginScreen());
             },
-            icon: Icon(
-              Icons.logout,
-            ),
+            icon: const Icon(Icons.logout),
           ),
         ],
         centerTitle: true,
@@ -61,7 +61,16 @@ class HomeScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Welcome Header
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.network(
+                  'https://outoftownblog.com/wp-content/uploads/2014/03/Dona-Aurora-Aragon-Quezon-House-600x398.jpg',
+                  height: 200,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              const SizedBox(height: 16),
               TextWidget(
                 text: 'Welcome to Aurora Province',
                 fontSize: 24,
@@ -71,116 +80,45 @@ class HomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               TextWidget(
-                text: 'Discover, plan, and explore with AuTour',
+                text:
+                    'Discover lush landscapes, historic culture, and meaningful community through modern and sustainable travel tools.',
                 fontSize: 14,
                 color: grey,
                 fontFamily: 'Regular',
-                align: TextAlign.left,
               ),
-              const SizedBox(height: 20),
-              // Feature Cards
-              _buildFeatureCard(
-                context,
-                title: 'AI-Powered Chatbot',
-                description: 'Get instant answers and accessibility info',
-                icon: Icons.chat_bubble_outline,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const ChatbotScreen()),
-                  );
-                },
+              const SizedBox(height: 24),
+              _buildFeatureGrid(context),
+              const SizedBox(height: 30),
+              TextWidget(
+                text: 'Explore Local Communities',
+                fontSize: 18,
+                color: black,
+                fontFamily: 'Bold',
               ),
-              const SizedBox(height: 12),
-              _buildFeatureCard(
-                context,
-                title: 'Smart Tourism Guide',
-                description: 'Explore interactive maps and eco-tourism sites',
-                icon: Icons.map_outlined,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const PlaceholderScreen(
-                            title: 'Smart Tourism Guide')),
-                  );
-                },
+              const SizedBox(height: 8),
+              TextWidget(
+                text:
+                    'Get to know the heart of Aurora through its people, heritage, and eco-conscious practices.',
+                fontSize: 14,
+                color: grey,
+                fontFamily: 'Regular',
               ),
               const SizedBox(height: 12),
-              _buildFeatureCard(
-                context,
-                title: 'Local Businesses',
-                description: 'Discover accommodations, dining, and services',
-                icon: Icons.storefront_outlined,
-                onTap: () {
+              ButtonWidget(
+                label: 'Explore Community Stories',
+                onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                        builder: (context) => const LocalBusinessesScreen()),
+                    MaterialPageRoute(builder: (_) => const CommunityScreen()),
                   );
                 },
+                color: primary,
+                textColor: white,
+                width: double.infinity,
+                height: 48,
+                radius: 10,
+                fontSize: 14,
               ),
-              const SizedBox(height: 12),
-              _buildFeatureCard(
-                context,
-                title: 'Disaster Preparedness & Weather',
-                description: 'Stay safe with real-time alerts',
-                icon: Icons.warning_amber_outlined,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            const DisasterPreparednessScreen()),
-                  );
-                },
-              ),
-              const SizedBox(height: 12),
-              _buildFeatureCard(
-                context,
-                title: 'Personalized Travel Planner',
-                description: 'Customize your Aurora adventure',
-                icon: Icons.event_note_outlined,
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const TravelPlannerScreen()));
-                },
-              ),
-              const SizedBox(height: 12),
-              _buildFeatureCard(
-                context,
-                title: 'Community & Cultural Preservation',
-                description: 'Engage with local stories and heritage',
-                icon: Icons.people_outline,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const CommunityScreen(),
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 12),
-              _buildFeatureCard(
-                context,
-                title: 'QR Code Tourist Pass',
-                description: 'Access attractions and services seamlessly',
-                icon: Icons.qr_code_outlined,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            const PlaceholderScreen(title: 'QR Code Pass')),
-                  );
-                },
-              ),
-              const SizedBox(height: 20),
-              // Quick Action Button
             ],
           ),
         ),
@@ -188,74 +126,112 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildFeatureCard(
-    BuildContext context, {
-    required String title,
-    required String description,
-    required IconData icon,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: white,
-          borderRadius: BorderRadius.circular(10),
-          boxShadow: [
-            BoxShadow(
-              color: grey.withOpacity(0.2),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: secondary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(
-                icon,
-                color: primary,
-                size: 28,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  TextWidget(
-                    text: title,
-                    fontSize: 16,
-                    color: black,
-                    fontFamily: 'Bold',
-                    align: TextAlign.left,
-                  ),
-                  const SizedBox(height: 4),
-                  TextWidget(
-                    text: description,
-                    fontSize: 12,
-                    color: grey,
-                    fontFamily: 'Regular',
-                    align: TextAlign.left,
-                    maxLines: 2,
-                  ),
-                ],
-              ),
-            ),
-            Icon(
-              Icons.arrow_forward_ios,
-              color: grey,
-              size: 16,
-            ),
-          ],
-        ),
+  Widget _buildFeatureGrid(BuildContext context) {
+    final features = [
+      {
+        'title': 'AI-Powered Chatbot',
+        'description': 'Get instant answers and accessibility info',
+        'icon': Icons.chat_bubble_outline,
+        'screen': const ChatbotScreen(),
+      },
+      {
+        'title': 'Smart Tourism Guide',
+        'description': 'Explore maps and eco-tourism sites',
+        'icon': Icons.map_outlined,
+        'screen': SmartTourismGuideScreen(),
+      },
+      {
+        'title': 'Local Businesses',
+        'description': 'Find accommodations and dining',
+        'icon': Icons.storefront_outlined,
+        'screen': const LocalBusinessesScreen(),
+      },
+      {
+        'title': 'Disaster Preparedness',
+        'description': 'Stay safe with real-time alerts',
+        'icon': Icons.warning_amber_outlined,
+        'screen': const DisasterPreparednessScreen(),
+      },
+      {
+        'title': 'Travel Planner',
+        'description': 'Customize your adventure',
+        'icon': Icons.event_note_outlined,
+        'screen': const TravelPlannerScreen(),
+      },
+      {
+        'title': 'Cultural Preservation',
+        'description': 'Engage with local heritage',
+        'icon': Icons.people_outline,
+        'screen': const CommunityScreen(),
+      },
+      {
+        'title': 'QR Code Pass',
+        'description': 'Access attractions easily',
+        'icon': Icons.qr_code_outlined,
+        'screen': const QrCodeTouristPassScreen(),
+      },
+    ];
+
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: features.length,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+        childAspectRatio: 3 / 2.3,
       ),
+      itemBuilder: (context, index) {
+        final feature = features[index];
+        return GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => feature['screen'] as Widget),
+            );
+          },
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: white,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: grey.withOpacity(0.15),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  feature['icon'] as IconData,
+                  size: 28,
+                  color: primary,
+                ),
+                const SizedBox(height: 10),
+                TextWidget(
+                  text: feature['title'] as String,
+                  fontSize: 14,
+                  color: black,
+                  fontFamily: 'Bold',
+                ),
+                const SizedBox(height: 4),
+                TextWidget(
+                  text: feature['description'] as String,
+                  fontSize: 12,
+                  color: grey,
+                  fontFamily: 'Regular',
+                  maxLines: 2,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
