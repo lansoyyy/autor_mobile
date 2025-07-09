@@ -1,5 +1,6 @@
 import 'package:autour_mobile/screens/auth/login_screen.dart';
 import 'package:autour_mobile/screens/home_screens/chatbot_screen.dart';
+import 'package:autour_mobile/screens/home_screens/disaster.preparedness_screen.dart';
 import 'package:autour_mobile/screens/home_screens/local.businesses_screen.dart';
 import 'package:autour_mobile/widgets/logout_widget.dart';
 import 'package:flutter/material.dart';
@@ -128,8 +129,8 @@ class HomeScreen extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const PlaceholderScreen(
-                            title: 'Disaster Preparedness')),
+                        builder: (context) =>
+                            const DisasterPreparednessScreen()),
                   );
                 },
               ),
