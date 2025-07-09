@@ -111,22 +111,23 @@ class _SignUpScreenState extends State<SignUpScreen> {
               children: [
                 // Logo Placeholder
                 Container(
-                  width: 100,
-                  height: 100,
-                  margin: const EdgeInsets.only(top: 12, bottom: 8),
+                  width: 120,
+                  height: 120,
                   decoration: BoxDecoration(
-                    color: grey.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12),
+                    color: Colors.grey.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(16),
                   ),
                   child: Center(
                     child: TextWidget(
                       text: 'Logo',
-                      fontSize: 18,
-                      color: black,
+                      fontSize: 24,
+                      color: primary,
                       fontFamily: 'Bold',
-                      align: TextAlign.center,
                     ),
                   ),
+                ),
+                SizedBox(
+                  height: 10,
                 ),
                 // Title
                 TextWidget(
@@ -499,20 +500,34 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
                 const SizedBox(height: 12),
                 // Back to Login
-                GestureDetector(
-                  onTap: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => LoginScreen()),
-                    );
-                  },
-                  child: TextWidget(
-                    text: 'Already have an account? Login',
-                    fontSize: 14,
-                    color: secondary,
-                    fontFamily: 'Medium',
-                    align: TextAlign.center,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    TextWidget(
+                      text: "Already have an account?",
+                      fontSize: 14,
+                      color: black,
+                      fontFamily: 'Regular',
+                    ),
+                    SizedBox(
+                      width: 5,
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => LoginScreen()),
+                        );
+                      },
+                      child: TextWidget(
+                        text: "Log in",
+                        fontSize: 14,
+                        color: secondary,
+                        fontFamily: 'Bold',
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 12),
               ],

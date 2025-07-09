@@ -17,83 +17,83 @@ class LoginScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: white,
       body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                const SizedBox(height: 40),
                 // Logo Placeholder
                 Container(
-                  width: 150,
-                  height: 150,
+                  width: 120,
+                  height: 120,
                   decoration: BoxDecoration(
-                    color: grey.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(20),
+                    color: Colors.grey.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(16),
                   ),
                   child: Center(
                     child: TextWidget(
                       text: 'Logo',
                       fontSize: 24,
-                      color: black,
+                      color: primary,
                       fontFamily: 'Bold',
-                      align: TextAlign.center,
                     ),
                   ),
                 ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 30),
                 // Title
                 TextWidget(
-                  text: 'Welcome to AuTour',
-                  fontSize: 28,
+                  text: 'Welcome Back!',
+                  fontSize: 26,
                   color: primary,
                   fontFamily: 'Bold',
-                  align: TextAlign.center,
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 8),
                 TextWidget(
-                  text: 'Explore Aurora Province',
-                  fontSize: 16,
+                  text: 'Login to explore Aurora with us',
+                  fontSize: 14,
                   color: grey,
                   fontFamily: 'Regular',
-                  align: TextAlign.center,
                 ),
-                const SizedBox(height: 30),
+                const SizedBox(height: 32),
                 // Email Field
                 TextFieldWidget(
-                  label: 'Email',
-                  hint: 'Enter your email',
+                  label: 'Email Address',
+                  hint: 'example@email.com',
                   controller: emailController,
                   inputType: TextInputType.emailAddress,
                   borderColor: primary,
                   hintColor: grey,
-                  width: 300,
+                  width: double.infinity,
                   height: 65,
-                  radius: 10,
+                  radius: 12,
                   hasValidator: true,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter your email';
                     }
-                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}\$')
                         .hasMatch(value)) {
-                      return 'Please enter a valid email';
+                      return 'Enter a valid email address';
                     }
                     return null;
                   },
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 16),
                 // Password Field
                 TextFieldWidget(
                   label: 'Password',
-                  hint: 'Enter your password',
+                  hint: '••••••••',
                   controller: passwordController,
                   isObscure: true,
                   showEye: true,
                   borderColor: primary,
                   hintColor: grey,
-                  width: 300,
+                  width: double.infinity,
                   height: 65,
-                  radius: 10,
+                  radius: 12,
                   hasValidator: true,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -105,12 +105,11 @@ class LoginScreen extends StatelessWidget {
                     return null;
                   },
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 24),
                 // Login Button
                 ButtonWidget(
                   label: 'Login',
                   onPressed: () {
-                    // Handle login logic here
                     if (emailController.text.isNotEmpty &&
                         passwordController.text.isNotEmpty) {
                       Navigator.pushAndRemoveUntil(
@@ -123,30 +122,43 @@ class LoginScreen extends StatelessWidget {
                   },
                   color: primary,
                   textColor: white,
-                  width: 300,
+                  width: double.infinity,
                   height: 55,
-                  radius: 10,
+                  radius: 12,
                   fontSize: 18,
                 ),
-                const SizedBox(height: 20),
-                // Signup Text Button
-                GestureDetector(
-                  onTap: () {
-                    // Navigate to signup screen (placeholder)
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const SignUpScreen()),
-                    );
-                  },
-                  child: TextWidget(
-                    text: "Don't have an account? Sign Up",
-                    fontSize: 16,
-                    color: secondary,
-                    fontFamily: 'Medium',
-                    align: TextAlign.center,
-                  ),
+                const SizedBox(height: 24),
+                // Divider and signup prompt
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    TextWidget(
+                      text: "Don't have an account? ",
+                      fontSize: 14,
+                      color: black,
+                      fontFamily: 'Regular',
+                    ),
+                    SizedBox(
+                      width: 5,
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const SignUpScreen()),
+                        );
+                      },
+                      child: TextWidget(
+                        text: "Sign Up",
+                        fontSize: 14,
+                        color: secondary,
+                        fontFamily: 'Bold',
+                      ),
+                    ),
+                  ],
                 ),
+                const SizedBox(height: 40),
               ],
             ),
           ),
