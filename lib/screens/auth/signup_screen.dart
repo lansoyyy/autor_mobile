@@ -34,14 +34,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final List<String> preferencesOptions = [
     'Beaches',
     'Hiking',
-    'Cultural Tours',
-    'Waterfalls',
+    'Food',
+    'History',
+    'Eco-Tourism',
+    'Festivals',
   ];
 
   final List<String> sustainabilityOptions = [
-    'Eco-friendly Tours',
-    'Minimal Plastic',
-    'Sustainable Accommodations',
+    'Low Carbon Travel',
+    'Local Businesses',
+    'Zero Waste',
+    'Eco Lodging',
   ];
 
   @override

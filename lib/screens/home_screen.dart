@@ -2,6 +2,7 @@ import 'package:autour_mobile/screens/auth/login_screen.dart';
 import 'package:autour_mobile/screens/home_screens/chatbot_screen.dart';
 import 'package:autour_mobile/screens/home_screens/disaster.preparedness_screen.dart';
 import 'package:autour_mobile/screens/home_screens/local.businesses_screen.dart';
+import 'package:autour_mobile/screens/home_screens/travel.planner_screen.dart';
 import 'package:autour_mobile/widgets/logout_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:autour_mobile/utils/colors.dart';
@@ -142,11 +143,9 @@ class HomeScreen extends StatelessWidget {
                 icon: Icons.event_note_outlined,
                 onTap: () {
                   Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            const PlaceholderScreen(title: 'Travel Planner')),
-                  );
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const TravelPlannerScreen()));
                 },
               ),
               const SizedBox(height: 12),
