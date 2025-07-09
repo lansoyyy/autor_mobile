@@ -1,4 +1,6 @@
+import 'package:autour_mobile/screens/auth/login_screen.dart';
 import 'package:autour_mobile/screens/home_screens/chatbot_screen.dart';
+import 'package:autour_mobile/widgets/logout_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:autour_mobile/utils/colors.dart';
 import 'package:autour_mobile/widgets/text_widget.dart';
@@ -12,6 +14,7 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: white,
       appBar: AppBar(
+        foregroundColor: Colors.white,
         backgroundColor: primary,
         elevation: 0,
         title: TextWidget(
@@ -21,6 +24,16 @@ class HomeScreen extends StatelessWidget {
           fontFamily: 'Bold',
           align: TextAlign.center,
         ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              logout(context, LoginScreen());
+            },
+            icon: Icon(
+              Icons.logout,
+            ),
+          ),
+        ],
         centerTitle: true,
         leading: Container(
           margin: const EdgeInsets.all(8),
@@ -167,28 +180,6 @@ class HomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               // Quick Action Button
-              ButtonWidget(
-                label: 'Start Exploring',
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: TextWidget(
-                        text: 'Exploring Aurora Province!',
-                        fontSize: 14,
-                        color: white,
-                      ),
-                      backgroundColor: primary,
-                      duration: const Duration(seconds: 2),
-                    ),
-                  );
-                },
-                color: primary,
-                textColor: white,
-                width: double.infinity,
-                height: 50,
-                radius: 8,
-                fontSize: 16,
-              ),
             ],
           ),
         ),
