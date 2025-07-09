@@ -1,3 +1,4 @@
+import 'package:autour_mobile/screens/auth/login_screen.dart';
 import 'package:autour_mobile/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -13,7 +14,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'AuTour',
-      home: const HomeScreen(),
+      home: LoginScreen(),
     );
   }
 }
