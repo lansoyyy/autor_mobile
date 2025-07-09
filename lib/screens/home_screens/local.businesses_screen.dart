@@ -31,30 +31,45 @@ class _LocalBusinessesScreenState extends State<LocalBusinessesScreen> {
       'category': 'Accommodations',
       'location': 'Baler, Aurora',
       'description': 'Cozy beachfront resort with accessible rooms.',
+      'phone': '09751000896',
+      'email': 'baler.eco@gmail.com.ph',
+      'hours': '8:00AM - 5:00PM'
     },
     {
       'name': 'Aurora Eats',
       'category': 'Restaurants',
       'location': 'Maria Aurora, Aurora',
       'description': 'Local cuisine with vegan options.',
+      'phone': '09751000896',
+      'email': 'baler.eco@gmail.com.ph',
+      'hours': '8:00AM - 5:00PM'
     },
     {
       'name': 'Baler Bus Terminal',
       'category': 'Transportation',
       'location': 'Baler, Aurora',
       'description': 'Convenient bus services to Aurora.',
+      'phone': '09751000896',
+      'email': 'baler.eco@gmail.com.ph',
+      'hours': '8:00AM - 5:00PM'
     },
     {
       'name': 'Eco Tours Aurora',
       'category': 'Tours',
       'location': 'Dingalan, Aurora',
       'description': 'Guided eco-friendly tours to waterfalls.',
+      'phone': '09751000896',
+      'email': 'baler.eco@gmail.com.ph',
+      'hours': '8:00AM - 5:00PM'
     },
     {
       'name': 'Quick Fix Vulcanizing',
       'category': 'Services',
       'location': 'San Luis, Aurora',
       'description': 'Reliable tire repair services.',
+      'phone': '09751000896',
+      'email': 'baler.eco@gmail.com.ph',
+      'hours': '8:00AM - 5:00PM'
     },
   ];
 
@@ -323,7 +338,7 @@ class BusinessDetailScreen extends StatelessWidget {
         backgroundColor: primary,
         elevation: 0,
         title: TextWidget(
-          text: business['name']!,
+          text: business['name'] ?? 'Business Detail',
           fontSize: 18,
           color: white,
           fontFamily: 'Bold',
@@ -335,15 +350,16 @@ class BusinessDetailScreen extends StatelessWidget {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Image
+              // Business Image
               ClipRRect(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(12),
                 child: Image.network(
-                  'https://live.staticflickr.com/506/19664562909_4ddd66e89f_b.jpg',
+                  business['image'] ??
+                      'https://live.staticflickr.com/506/19664562909_4ddd66e89f_b.jpg',
                   height: 200,
                   width: double.infinity,
                   fit: BoxFit.cover,
@@ -361,53 +377,59 @@ class BusinessDetailScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+
+              const SizedBox(height: 20),
+
               // Business Name
               TextWidget(
-                text: business['name']!,
-                fontSize: 22,
+                text: business['name'] ?? 'Unknown',
+                fontSize: 24,
                 color: black,
                 fontFamily: 'Bold',
-                align: TextAlign.left,
               ),
-              const SizedBox(height: 8),
+
+              const SizedBox(height: 6),
+
               // Category
               TextWidget(
-                text: 'Category: ${business['category']}',
+                text: business['category'] ?? '',
                 fontSize: 16,
                 color: primary,
                 fontFamily: 'Medium',
-                align: TextAlign.left,
               ),
-              const SizedBox(height: 8),
-              // Location
-              TextWidget(
-                text: 'Location: ${business['location']}',
-                fontSize: 16,
-                color: grey,
-                fontFamily: 'Regular',
-                align: TextAlign.left,
-              ),
-              const SizedBox(height: 16),
+
+              const SizedBox(height: 20),
+
+              // Contact Details Section
+              _buildDetailRow(
+                  Icons.location_on, 'Location', business['location']),
+              _buildDetailRow(Icons.phone, 'Phone', business['phone']),
+              _buildDetailRow(Icons.email, 'Email', business['email']),
+
+              _buildDetailRow(
+                  Icons.access_time, 'Business Hours', business['hours']),
+
+              const SizedBox(height: 24),
+
               // Description
               TextWidget(
-                text: 'Description',
-                fontSize: 16,
+                text: 'About the Business',
+                fontSize: 18,
                 color: black,
                 fontFamily: 'Bold',
-                align: TextAlign.left,
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 8),
               TextWidget(
-                text: business['description']!,
+                text: business['description'] ?? 'No description available.',
                 fontSize: 14,
                 color: grey,
                 fontFamily: 'Regular',
-                align: TextAlign.left,
-                maxLines: 10,
+                align: TextAlign.justify,
               ),
-              const SizedBox(height: 16),
-              // Contact Button (Placeholder)
+
+              const SizedBox(height: 30),
+
+              // Contact Button
               ButtonWidget(
                 label: 'Contact Business',
                 onPressed: () {
@@ -427,14 +449,35 @@ class BusinessDetailScreen extends StatelessWidget {
                 textColor: white,
                 width: double.infinity,
                 height: 50,
-                radius: 8,
+                radius: 10,
                 fontSize: 16,
               ),
+
               const SizedBox(height: 20),
-              // Book Now Button (Placeholder)
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  // Helper method to create icon-label-value rows
+  Widget _buildDetailRow(IconData icon, String label, String? value) {
+    if (value == null || value.trim().isEmpty) return const SizedBox();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Icon(icon, color: primary, size: 20),
+          const SizedBox(width: 8),
+          TextWidget(
+            text: '$label: $value',
+            fontSize: 14,
+            color: black,
+            fontFamily: 'Regular',
+          ),
+        ],
       ),
     );
   }
