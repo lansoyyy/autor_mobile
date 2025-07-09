@@ -1,4 +1,5 @@
 import 'package:autour_mobile/screens/auth/signup_screen.dart';
+import 'package:autour_mobile/screens/home_screen.dart';
 import 'package:autour_mobile/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:autour_mobile/widgets/text_widget.dart';
@@ -112,11 +113,11 @@ class LoginScreen extends StatelessWidget {
                     // Handle login logic here
                     if (emailController.text.isNotEmpty &&
                         passwordController.text.isNotEmpty) {
-                      // Placeholder for login action
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                            content: TextWidget(
-                                text: 'Login pressed', fontSize: 16)),
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const HomeScreen()),
+                        (route) => false,
                       );
                     }
                   },
