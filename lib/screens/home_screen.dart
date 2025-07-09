@@ -1,5 +1,6 @@
 import 'package:autour_mobile/screens/auth/login_screen.dart';
 import 'package:autour_mobile/screens/home_screens/chatbot_screen.dart';
+import 'package:autour_mobile/screens/home_screens/community_screen.dart';
 import 'package:autour_mobile/screens/home_screens/disaster.preparedness_screen.dart';
 import 'package:autour_mobile/screens/home_screens/local.businesses_screen.dart';
 import 'package:autour_mobile/screens/home_screens/travel.planner_screen.dart';
@@ -158,8 +159,8 @@ class HomeScreen extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const PlaceholderScreen(
-                            title: 'Community Engagement')),
+                      builder: (context) => const CommunityScreen(),
+                    ),
                   );
                 },
               ),
