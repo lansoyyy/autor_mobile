@@ -1,3 +1,4 @@
+import 'package:autour_mobile/screens/home_screens/common.dialects_screen.dart';
 import 'package:autour_mobile/screens/home_screens/health.surveillance_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:autour_mobile/utils/colors.dart';
@@ -181,7 +182,7 @@ class HomeScreen extends StatelessWidget {
         'title': 'Common Dialects',
         'description': 'Learn local phrases and dialects',
         'icon': Icons.language_outlined,
-        'screen': const PlaceholderScreen(title: 'Common Dialects'),
+        'screen': CommonDialectsScreen(),
       },
     ];
 
