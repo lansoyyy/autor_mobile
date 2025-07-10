@@ -1,5 +1,4 @@
-import 'package:autour_mobile/screens/home_screens/qrcode.pass_screen.dart';
-import 'package:autour_mobile/screens/home_screens/tourism.guide_screen.dart';
+import 'package:autour_mobile/screens/home_screens/health.surveillance_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:autour_mobile/utils/colors.dart';
 import 'package:autour_mobile/widgets/text_widget.dart';
@@ -9,6 +8,8 @@ import 'package:autour_mobile/screens/home_screens/community_screen.dart';
 import 'package:autour_mobile/screens/home_screens/disaster.preparedness_screen.dart';
 import 'package:autour_mobile/screens/home_screens/local.businesses_screen.dart';
 import 'package:autour_mobile/screens/home_screens/travel.planner_screen.dart';
+import 'package:autour_mobile/screens/home_screens/qrcode.pass_screen.dart';
+import 'package:autour_mobile/screens/home_screens/tourism.guide_screen.dart';
 import 'package:autour_mobile/widgets/logout_widget.dart';
 import 'package:autour_mobile/screens/auth/login_screen.dart';
 
@@ -138,7 +139,7 @@ class HomeScreen extends StatelessWidget {
         'title': 'Smart Tourism Guide',
         'description': 'Explore maps and eco-tourism sites',
         'icon': Icons.map_outlined,
-        'screen': SmartTourismGuideScreen(),
+        'screen': const SmartTourismGuideScreen(),
       },
       {
         'title': 'Local Businesses',
@@ -169,6 +170,18 @@ class HomeScreen extends StatelessWidget {
         'description': 'Access attractions easily',
         'icon': Icons.qr_code_outlined,
         'screen': const QrCodeTouristPassScreen(),
+      },
+      {
+        'title': 'Health Surveillance',
+        'description': 'Ensure safety with health checks',
+        'icon': Icons.health_and_safety_outlined,
+        'screen': HealthSurveillanceScreen()
+      },
+      {
+        'title': 'Common Dialects',
+        'description': 'Learn local phrases and dialects',
+        'icon': Icons.language_outlined,
+        'screen': const PlaceholderScreen(title: 'Common Dialects'),
       },
     ];
 

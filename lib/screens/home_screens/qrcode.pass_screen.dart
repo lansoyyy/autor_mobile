@@ -43,28 +43,31 @@ class QrCodeTouristPassScreen extends StatelessWidget {
                 Icon(Icons.qr_code_2, size: 80, color: primary),
                 const SizedBox(height: 12),
                 TextWidget(
-                  text: 'Your Unique QR Code',
+                  text: 'Scan QR Code',
                   fontSize: 18,
                   color: black,
                   fontFamily: 'Bold',
                 ),
                 const SizedBox(height: 6),
                 TextWidget(
-                  text: 'Auto-generated upon registration',
+                  text: 'Click below to start scanning',
                   fontSize: 12,
                   color: grey,
                   fontFamily: 'Regular',
                 ),
                 const SizedBox(height: 12),
-                Container(
-                  height: 180,
-                  width: 180,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Center(
-                    child: Icon(Icons.qr_code, size: 100, color: grey),
+                GestureDetector(
+                  onTap: () {},
+                  child: Container(
+                    height: 180,
+                    width: 180,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Center(
+                      child: Icon(Icons.qr_code, size: 100, color: grey),
+                    ),
                   ),
                 ),
               ],
