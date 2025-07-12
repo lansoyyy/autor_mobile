@@ -6,11 +6,102 @@ import 'package:autour_mobile/widgets/text_widget.dart';
 import 'package:autour_mobile/widgets/button_widget.dart';
 import 'package:autour_mobile/widgets/textfield_widget.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen>
+    with TickerProviderStateMixin {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  LoginScreen({super.key});
+  late AnimationController _logoAnimationController;
+  late AnimationController _formAnimationController;
+  late Animation<double> _logoScaleAnimation;
+  late Animation<Offset> _formSlideAnimation;
+  late Animation<double> _formFadeAnimation;
+
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _logoAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 1200),
+      vsync: this,
+    );
+
+    _formAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+
+    _logoScaleAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _logoAnimationController,
+      curve: Curves.elasticOut,
+    ));
+
+    _formSlideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.3),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _formAnimationController,
+      curve: Curves.easeOutCubic,
+    ));
+
+    _formFadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _formAnimationController,
+      curve: Curves.easeOut,
+    ));
+
+    _logoAnimationController.forward();
+    Future.delayed(const Duration(milliseconds: 400), () {
+      _formAnimationController.forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    _logoAnimationController.dispose();
+    _formAnimationController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleLogin() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    // Simulate API call
+    await Future.delayed(const Duration(seconds: 2));
+
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+        (route) => false,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,146 +111,226 @@ class LoginScreen extends StatelessWidget {
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const SizedBox(height: 40),
-                // Logo Placeholder
-                Container(
-                  width: 120,
-                  height: 120,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Center(
-                    child: TextWidget(
-                      text: 'Logo',
-                      fontSize: 24,
-                      color: primary,
-                      fontFamily: 'Bold',
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 30),
-                // Title
-                TextWidget(
-                  text: 'Welcome Back!',
-                  fontSize: 26,
-                  color: primary,
-                  fontFamily: 'Bold',
-                ),
-                const SizedBox(height: 8),
-                TextWidget(
-                  text: 'Login to explore Aurora with us',
-                  fontSize: 14,
-                  color: grey,
-                  fontFamily: 'Regular',
-                ),
-                const SizedBox(height: 32),
-                // Email Field
-                TextFieldWidget(
-                  label: 'Email Address',
-                  hint: 'example@email.com',
-                  controller: emailController,
-                  inputType: TextInputType.emailAddress,
-                  borderColor: primary,
-                  hintColor: grey,
-                  width: double.infinity,
-                  height: 65,
-                  radius: 12,
-                  hasValidator: true,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
-                    }
-                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}\$')
-                        .hasMatch(value)) {
-                      return 'Enter a valid email address';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                // Password Field
-                TextFieldWidget(
-                  label: 'Password',
-                  hint: '••••••••',
-                  controller: passwordController,
-                  isObscure: true,
-                  showEye: true,
-                  borderColor: primary,
-                  hintColor: grey,
-                  width: double.infinity,
-                  height: 65,
-                  radius: 12,
-                  hasValidator: true,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your password';
-                    }
-                    if (value.length < 6) {
-                      return 'Password must be at least 6 characters';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 24),
-                // Login Button
-                ButtonWidget(
-                  label: 'Login',
-                  onPressed: () {
-                    if (emailController.text.isNotEmpty &&
-                        passwordController.text.isNotEmpty) {
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const HomeScreen()),
-                        (route) => false,
-                      );
-                    }
-                  },
-                  color: primary,
-                  textColor: white,
-                  width: double.infinity,
-                  height: 55,
-                  radius: 12,
-                  fontSize: 18,
-                ),
-                const SizedBox(height: 24),
-                // Divider and signup prompt
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    TextWidget(
-                      text: "Don't have an account? ",
-                      fontSize: 14,
-                      color: black,
-                      fontFamily: 'Regular',
-                    ),
-                    SizedBox(
-                      width: 5,
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const SignUpScreen()),
-                        );
-                      },
-                      child: TextWidget(
-                        text: "Sign Up",
-                        fontSize: 14,
-                        color: secondary,
-                        fontFamily: 'Bold',
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 60),
+
+                  // Animated Logo
+                  ScaleTransition(
+                    scale: _logoScaleAnimation,
+                    child: Container(
+                      width: 120,
+                      height: 120,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Center(
+                        child: TextWidget(
+                          text: 'Logo',
+                          fontSize: 24,
+                          color: primary,
+                          fontFamily: 'Bold',
+                        ),
                       ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 40),
-              ],
+                  ),
+
+                  const SizedBox(height: 40),
+
+                  // Welcome Text
+                  SlideTransition(
+                    position: _formSlideAnimation,
+                    child: FadeTransition(
+                      opacity: _formFadeAnimation,
+                      child: Column(
+                        children: [
+                          TextWidget(
+                            text: 'Welcome Back!',
+                            fontSize: 28,
+                            color: primary,
+                            fontFamily: 'Bold',
+                          ),
+                          const SizedBox(height: 8),
+                          TextWidget(
+                            text: 'Sign in to continue your journey',
+                            fontSize: 16,
+                            color: grey,
+                            fontFamily: 'Regular',
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 40),
+
+                  // Form Fields
+                  SlideTransition(
+                    position: _formSlideAnimation,
+                    child: FadeTransition(
+                      opacity: _formFadeAnimation,
+                      child: Column(
+                        children: [
+                          // Email Field
+                          Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.1),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: TextFieldWidget(
+                              label: 'Email Address',
+                              hint: 'Enter your email',
+                              controller: emailController,
+                              inputType: TextInputType.emailAddress,
+                              borderColor: primary,
+                              hintColor: grey,
+                              width: double.infinity,
+                              height: 65,
+                              radius: 16,
+                              hasValidator: true,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter your email';
+                                }
+                                if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                                    .hasMatch(value)) {
+                                  return 'Enter a valid email address';
+                                }
+                                return null;
+                              },
+                            ),
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          // Password Field
+                          Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.1),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: TextFieldWidget(
+                              label: 'Password',
+                              hint: 'Enter your password',
+                              controller: passwordController,
+                              isObscure: true,
+                              showEye: true,
+                              borderColor: primary,
+                              hintColor: grey,
+                              width: double.infinity,
+                              height: 65,
+                              radius: 16,
+                              hasValidator: true,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter your password';
+                                }
+                                if (value.length < 6) {
+                                  return 'Password must be at least 6 characters';
+                                }
+                                return null;
+                              },
+                            ),
+                          ),
+
+                          const SizedBox(height: 30),
+
+                          // Login Button
+                          Container(
+                            width: double.infinity,
+                            height: 55,
+                            decoration: BoxDecoration(
+                              color: primary,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: primary.withOpacity(0.3),
+                                  blurRadius: 15,
+                                  offset: const Offset(0, 8),
+                                ),
+                              ],
+                            ),
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: _isLoading ? null : _handleLogin,
+                                borderRadius: BorderRadius.circular(16),
+                                child: Center(
+                                  child: _isLoading
+                                      ? const SizedBox(
+                                          width: 24,
+                                          height: 24,
+                                          child: CircularProgressIndicator(
+                                            color: Colors.white,
+                                            strokeWidth: 2,
+                                          ),
+                                        )
+                                      : TextWidget(
+                                          text: 'Sign In',
+                                          fontSize: 18,
+                                          color: white,
+                                          fontFamily: 'Bold',
+                                        ),
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 40),
+
+                          // Sign Up Prompt
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              TextWidget(
+                                text: "Don't have an account? ",
+                                fontSize: 14,
+                                color: black,
+                                fontFamily: 'Regular',
+                              ),
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const SignUpScreen()),
+                                  );
+                                },
+                                child: TextWidget(
+                                  text: "Sign Up",
+                                  fontSize: 14,
+                                  color: secondary,
+                                  fontFamily: 'Bold',
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 40),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

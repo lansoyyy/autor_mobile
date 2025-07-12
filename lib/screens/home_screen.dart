@@ -15,8 +15,61 @@ import 'package:autour_mobile/screens/home_screens/health.surveillance_screen.da
 import 'package:autour_mobile/widgets/logout_widget.dart';
 import 'package:autour_mobile/screens/auth/login_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
+  late AnimationController _fadeAnimationController;
+  late AnimationController _slideAnimationController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _fadeAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 1000),
+      vsync: this,
+    );
+
+    _slideAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _fadeAnimationController,
+      curve: Curves.easeOut,
+    ));
+
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.3),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _slideAnimationController,
+      curve: Curves.easeOutCubic,
+    ));
+
+    _fadeAnimationController.forward();
+    Future.delayed(const Duration(milliseconds: 300), () {
+      _slideAnimationController.forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    _fadeAnimationController.dispose();
+    _slideAnimationController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,29 +78,36 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         foregroundColor: Colors.white,
         backgroundColor: primary,
-        elevation: 4,
-        shadowColor: grey.withOpacity(0.3),
+        elevation: 0,
+        shadowColor: Colors.transparent,
         title: TextWidget(
           text: 'AuTour',
-          fontSize: 22,
+          fontSize: 24,
           color: white,
           fontFamily: 'Bold',
           align: TextAlign.center,
         ),
         actions: [
-          IconButton(
-            onPressed: () {
-              logout(context, LoginScreen());
-            },
-            icon: const Icon(Icons.logout, size: 26),
+          Container(
+            margin: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: IconButton(
+              onPressed: () {
+                logout(context, LoginScreen());
+              },
+              icon: const Icon(Icons.logout, size: 24),
+            ),
           ),
         ],
         centerTitle: true,
         leading: Container(
           margin: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: grey.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(8),
+            color: Colors.white.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(12),
           ),
           child: Center(
             child: TextWidget(
@@ -60,76 +120,134 @@ class HomeScreen extends StatelessWidget {
         ),
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          child: AnimatedOpacity(
-            opacity: 1.0,
-            duration: const Duration(milliseconds: 500),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Image Carousel
-                _buildImageCarousel(),
-                const SizedBox(height: 16),
-                // Welcome Section
-                TextWidget(
-                  text: 'Welcome to Aurora Province',
-                  fontSize: 28,
-                  color: primary,
-                  fontFamily: 'Bold',
-                  align: TextAlign.left,
-                ),
-                const SizedBox(height: 8),
-                TextWidget(
-                  text:
-                      'Explore lush landscapes, vibrant culture, and sustainable travel experiences in Aurora.',
-                  fontSize: 14,
-                  color: grey,
-                  fontFamily: 'Regular',
-                  maxLines: 2,
-                ),
-                const SizedBox(height: 24),
-                // Feature Grid
-                _buildFeatureGrid(context),
-                const SizedBox(height: 30),
-                // Community Stories Section
-                TextWidget(
-                  text: 'Explore Local Communities',
-                  fontSize: 20,
-                  color: black,
-                  fontFamily: 'Bold',
-                ),
-                const SizedBox(height: 8),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    TextWidget(
-                      text:
-                          'Discover the heart of Aurora through its people, heritage, and eco-conscious practices.',
-                      fontSize: 14,
-                      color: grey,
-                      fontFamily: 'Regular',
+        child: FadeTransition(
+          opacity: _fadeAnimation,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+            child: SlideTransition(
+              position: _slideAnimation,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Image Carousel
+                  _buildImageCarousel(),
+                  const SizedBox(height: 24),
+
+                  // Welcome Section
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: primary.withOpacity(0.05),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: primary.withOpacity(0.1),
+                        width: 1,
+                      ),
                     ),
-                    const SizedBox(height: 12),
-                    ButtonWidget(
-                      label: 'Explore Community Stories',
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (_) => const CommunityScreen()),
-                        );
-                      },
-                      color: primary,
-                      textColor: white,
-                      width: double.infinity,
-                      height: 50,
-                      radius: 12,
-                      fontSize: 14,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        TextWidget(
+                          text: 'Welcome to Aurora Province',
+                          fontSize: 28,
+                          color: primary,
+                          fontFamily: 'Bold',
+                          align: TextAlign.left,
+                        ),
+                        const SizedBox(height: 12),
+                        TextWidget(
+                          text:
+                              'Explore lush landscapes, vibrant culture, and sustainable travel experiences in Aurora.',
+                          fontSize: 16,
+                          color: grey,
+                          fontFamily: 'Regular',
+                          maxLines: 3,
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ],
+                  ),
+
+                  const SizedBox(height: 30),
+
+                  // Feature Grid
+                  _buildFeatureGrid(context),
+                  const SizedBox(height: 40),
+
+                  // Community Stories Section
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.1),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        TextWidget(
+                          text: 'Explore Local Communities',
+                          fontSize: 22,
+                          color: black,
+                          fontFamily: 'Bold',
+                        ),
+                        const SizedBox(height: 12),
+                        TextWidget(
+                          text:
+                              'Discover the heart of Aurora through its people, heritage, and eco-conscious practices.',
+                          fontSize: 16,
+                          color: grey,
+                          fontFamily: 'Regular',
+                        ),
+                        const SizedBox(height: 20),
+                        Container(
+                          width: double.infinity,
+                          height: 55,
+                          decoration: BoxDecoration(
+                            color: primary,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: primary.withOpacity(0.3),
+                                blurRadius: 15,
+                                offset: const Offset(0, 8),
+                              ),
+                            ],
+                          ),
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) => const CommunityScreen()),
+                                );
+                              },
+                              borderRadius: BorderRadius.circular(16),
+                              child: Center(
+                                child: TextWidget(
+                                  text: 'Explore Community Stories',
+                                  fontSize: 16,
+                                  color: white,
+                                  fontFamily: 'Bold',
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 30),
+                ],
+              ),
             ),
           ),
         ),
@@ -145,41 +263,64 @@ class HomeScreen extends StatelessWidget {
     ];
 
     return Container(
+      height: 220,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: grey.withOpacity(0.2),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
+            color: Colors.grey.withOpacity(0.2),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(20),
         child: Stack(
           children: [
             CarouselSlider(
               options: CarouselOptions(
-                height: 200,
+                height: 220,
                 autoPlay: true,
                 autoPlayInterval: const Duration(seconds: 5),
                 enlargeCenterPage: true,
                 viewportFraction: 1.0,
+                autoPlayCurve: Curves.easeInOut,
+                autoPlayAnimationDuration: const Duration(milliseconds: 800),
               ),
               items: images.map((imageUrl) {
-                return Image.network(
-                  imageUrl,
+                return Container(
                   width: double.infinity,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Container(
-                    color: grey.withOpacity(0.2),
-                    child: Center(
-                      child: TextWidget(
-                        text: 'Image Unavailable',
-                        fontSize: 14,
-                        color: grey,
-                        fontFamily: 'Regular',
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Image.network(
+                    imageUrl,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      decoration: BoxDecoration(
+                        color: grey.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.image_not_supported,
+                              size: 48,
+                              color: grey,
+                            ),
+                            const SizedBox(height: 8),
+                            TextWidget(
+                              text: 'Image Unavailable',
+                              fontSize: 16,
+                              color: grey,
+                              fontFamily: 'Regular',
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -187,13 +328,15 @@ class HomeScreen extends StatelessWidget {
               }).toList(),
             ),
             Container(
-              height: 200,
+              height: 220,
               decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
                 gradient: LinearGradient(
                   begin: Alignment.bottomCenter,
                   end: Alignment.topCenter,
                   colors: [
-                    black.withOpacity(0.3),
+                    black.withOpacity(0.4),
+                    Colors.transparent,
                     Colors.transparent,
                   ],
                 ),
@@ -212,54 +355,63 @@ class HomeScreen extends StatelessWidget {
         'description': 'Get instant answers and accessibility info',
         'icon': Icons.chat_bubble_outline,
         'screen': const ChatbotScreen(),
+        'color': Colors.blue,
       },
       {
         'title': 'Smart Tourism Guide',
         'description': 'Explore maps and eco-tourism sites',
         'icon': Icons.map_outlined,
         'screen': const SmartTourismGuideScreen(),
+        'color': Colors.green,
       },
       {
         'title': 'Local Businesses',
         'description': 'Find accommodations and dining',
         'icon': Icons.storefront_outlined,
         'screen': const LocalBusinessesScreen(),
+        'color': Colors.orange,
       },
       {
         'title': 'Disaster Preparedness',
         'description': 'Stay safe with real-time alerts',
         'icon': Icons.warning_amber_outlined,
         'screen': const DisasterPreparednessScreen(),
+        'color': Colors.red,
       },
       {
         'title': 'Travel Planner',
         'description': 'Customize your adventure',
         'icon': Icons.event_note_outlined,
         'screen': const TravelPlannerScreen(),
+        'color': Colors.purple,
       },
       {
         'title': 'Cultural Preservation',
         'description': 'Engage with local heritage',
         'icon': Icons.people_outline,
         'screen': const CommunityScreen(),
+        'color': Colors.teal,
       },
       {
         'title': 'QR Code Pass',
         'description': 'Access attractions easily',
         'icon': Icons.qr_code_outlined,
         'screen': const QrCodeTouristPassScreen(),
+        'color': Colors.indigo,
       },
       {
         'title': 'Health Surveillance',
         'description': 'Ensure safety with health checks',
         'icon': Icons.health_and_safety_outlined,
         'screen': const HealthSurveillanceScreen(),
+        'color': Colors.pink,
       },
       {
         'title': 'Common Dialects',
         'description': 'Learn local phrases and dialects',
         'icon': Icons.language_outlined,
         'screen': const CommonDialectsScreen(),
+        'color': Colors.amber,
       },
     ];
 
@@ -269,62 +421,79 @@ class HomeScreen extends StatelessWidget {
       itemCount: features.length,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 3 / 2.5,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+        childAspectRatio: 3 / 3.2,
       ),
       itemBuilder: (context, index) {
         final feature = features[index];
-        return GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => feature['screen'] as Widget),
+        return TweenAnimationBuilder<double>(
+          duration: Duration(milliseconds: 600 + (index * 100)),
+          tween: Tween(begin: 0.0, end: 1.0),
+          builder: (context, value, child) {
+            return Transform.scale(
+              scale: value,
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => feature['screen'] as Widget),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.1),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                    border: Border.all(
+                      color: (feature['color'] as Color).withOpacity(0.1),
+                      width: 1,
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: (feature['color'] as Color).withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          feature['icon'] as IconData,
+                          size: 28,
+                          color: feature['color'] as Color,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      TextWidget(
+                        text: feature['title'] as String,
+                        fontSize: 14,
+                        color: black,
+                        fontFamily: 'Bold',
+                      ),
+                      const SizedBox(height: 6),
+                      TextWidget(
+                        text: feature['description'] as String,
+                        fontSize: 12,
+                        color: grey,
+                        fontFamily: 'Regular',
+                        maxLines: 2,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             );
           },
-          child: AnimatedScale(
-            scale: 1.0,
-            duration: const Duration(milliseconds: 200),
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: grey.withOpacity(0.2),
-                    blurRadius: 6,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    feature['icon'] as IconData,
-                    size: 30,
-                    color: primary,
-                  ),
-                  const SizedBox(height: 12),
-                  TextWidget(
-                    text: feature['title'] as String,
-                    fontSize: 14,
-                    color: black,
-                    fontFamily: 'Bold',
-                  ),
-                  const SizedBox(height: 6),
-                  TextWidget(
-                    text: feature['description'] as String,
-                    fontSize: 12,
-                    color: grey,
-                    fontFamily: 'Regular',
-                    maxLines: 1,
-                  ),
-                ],
-              ),
-            ),
-          ),
         );
       },
     );
