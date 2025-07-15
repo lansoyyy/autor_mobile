@@ -34,7 +34,11 @@ class _LocalBusinessesScreenState extends State<LocalBusinessesScreen> {
       'description': 'Cozy beachfront resort with accessible rooms.',
       'phone': '09751000896',
       'email': 'baler.eco@gmail.com.ph',
-      'hours': '8:00AM - 5:00PM'
+      'hours': '8:00AM - 5:00PM',
+      'rooms_available': 12,
+      'total_rooms': 25,
+      'room_types': ['Standard', 'Deluxe', 'Suite'],
+      'price_range': '₱2,500 - ₱8,000',
     },
     {
       'name': 'Aurora Eats',
@@ -180,6 +184,32 @@ class _LocalBusinessesScreenState extends State<LocalBusinessesScreen> {
       'email': 'baler.eco@gmail.com.ph',
       'hours': '8:00AM - 5:00PM'
     },
+    {
+      'name': 'Aurora Mountain Lodge',
+      'category': 'Accommodations',
+      'location': 'San Luis, Aurora',
+      'description': 'Scenic mountain lodge with panoramic views.',
+      'phone': '09751000897',
+      'email': 'aurora.lodge@gmail.com.ph',
+      'hours': '24/7',
+      'rooms_available': 5,
+      'total_rooms': 15,
+      'room_types': ['Cabin', 'Deluxe Cabin', 'Family Suite'],
+      'price_range': '₱3,500 - ₱12,000',
+    },
+    {
+      'name': 'Baler Bay Hotel',
+      'category': 'Accommodations',
+      'location': 'Baler, Aurora',
+      'description': 'Modern hotel with beach access and amenities.',
+      'phone': '09751000898',
+      'email': 'baler.bay@gmail.com.ph',
+      'hours': '24/7',
+      'rooms_available': 0,
+      'total_rooms': 40,
+      'room_types': ['Standard', 'Deluxe', 'Executive Suite'],
+      'price_range': '₱4,000 - ₱15,000',
+    },
   ];
 
   List<Map<String, dynamic>> get filteredBusinesses {
@@ -301,6 +331,7 @@ class _LocalBusinessesScreenState extends State<LocalBusinessesScreen> {
                 final business = filteredBusinesses[index];
                 return _buildBusinessCard(
                   context,
+                  business: business,
                   name: business['name']!,
                   category: business['category']!,
                   location: business['location']!,
@@ -327,6 +358,7 @@ class _LocalBusinessesScreenState extends State<LocalBusinessesScreen> {
 
   Widget _buildBusinessCard(
     BuildContext context, {
+    required Map<String, dynamic> business,
     required String name,
     required String category,
     required String location,
@@ -381,12 +413,21 @@ class _LocalBusinessesScreenState extends State<LocalBusinessesScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  TextWidget(
-                    text: name,
-                    fontSize: 16,
-                    color: black,
-                    fontFamily: 'Bold',
-                    align: TextAlign.left,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextWidget(
+                          text: name,
+                          fontSize: 16,
+                          color: black,
+                          fontFamily: 'Bold',
+                          align: TextAlign.left,
+                        ),
+                      ),
+                      // Room Availability Badge for Accommodations
+                      if (category == 'Accommodations')
+                        _buildRoomAvailabilityBadge(business),
+                    ],
                   ),
                   const SizedBox(height: 4),
                   TextWidget(
@@ -413,6 +454,9 @@ class _LocalBusinessesScreenState extends State<LocalBusinessesScreen> {
                     align: TextAlign.left,
                     maxLines: 2,
                   ),
+                  // Room Information for Accommodations
+                  if (category == 'Accommodations')
+                    _buildRoomInformation(business),
                   const SizedBox(height: 8),
                   ButtonWidget(
                     label: 'View Details',
@@ -430,6 +474,96 @@ class _LocalBusinessesScreenState extends State<LocalBusinessesScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildRoomAvailabilityBadge(Map<String, dynamic> business) {
+    if (business['rooms_available'] == null) {
+      return const SizedBox();
+    }
+
+    final roomsAvailable = business['rooms_available'] as int;
+    final totalRooms = business['total_rooms'] as int;
+
+    Color badgeColor;
+    String availabilityText;
+
+    if (roomsAvailable == 0) {
+      badgeColor = Colors.red;
+      availabilityText = 'FULLY BOOKED';
+    } else if (roomsAvailable <= 3) {
+      badgeColor = Colors.orange;
+      availabilityText = 'LIMITED';
+    } else {
+      badgeColor = Colors.green;
+      availabilityText = 'AVAILABLE';
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: badgeColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: badgeColor.withOpacity(0.3)),
+      ),
+      child: TextWidget(
+        text: availabilityText,
+        fontSize: 10,
+        color: badgeColor,
+        fontFamily: 'Bold',
+      ),
+    );
+  }
+
+  Widget _buildRoomInformation(Map<String, dynamic> business) {
+    if (business['rooms_available'] == null) {
+      return const SizedBox();
+    }
+
+    final roomsAvailable = business['rooms_available'] as int;
+    final totalRooms = business['total_rooms'] as int;
+    final roomTypes = business['room_types'] as List<String>?;
+    final priceRange = business['price_range'] as String?;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Icon(
+              Icons.bed,
+              color: primary,
+              size: 16,
+            ),
+            const SizedBox(width: 4),
+            TextWidget(
+              text: '$roomsAvailable/$totalRooms rooms available',
+              fontSize: 12,
+              color: primary,
+              fontFamily: 'Medium',
+            ),
+          ],
+        ),
+        if (roomTypes != null && roomTypes.isNotEmpty) ...[
+          const SizedBox(height: 4),
+          TextWidget(
+            text: 'Types: ${roomTypes.join(', ')}',
+            fontSize: 11,
+            color: grey,
+            fontFamily: 'Regular',
+          ),
+        ],
+        if (priceRange != null) ...[
+          const SizedBox(height: 4),
+          TextWidget(
+            text: 'Price: $priceRange',
+            fontSize: 11,
+            color: grey,
+            fontFamily: 'Regular',
+          ),
+        ],
+      ],
     );
   }
 }
@@ -516,6 +650,11 @@ class BusinessDetailScreen extends StatelessWidget {
               _buildDetailRow(Icons.email, 'Email', business['email']),
               _buildDetailRow(
                   Icons.access_time, 'Business Hours', business['hours']),
+
+              // Room Availability Section (for Accommodations)
+              if (business['category'] == 'Accommodations' &&
+                  business['rooms_available'] != null)
+                _buildRoomAvailabilitySection(business),
 
               const SizedBox(height: 24),
 
@@ -713,6 +852,54 @@ class BusinessDetailScreen extends StatelessWidget {
                       ),
                     ))
                 .toList(),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Build room availability section for accommodations
+  Widget _buildRoomAvailabilitySection(Map<String, dynamic> business) {
+    final roomsAvailable = business['rooms_available'] as int;
+    final totalRooms = business['total_rooms'] as int;
+    final roomTypes = business['room_types'] as List<String>?;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextWidget(
+          text: 'Room Availability',
+          fontSize: 18,
+          color: black,
+          fontFamily: 'Bold',
+        ),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: grey.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: primary.withOpacity(0.3)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextWidget(
+                text: '$roomsAvailable/$totalRooms rooms available',
+                fontSize: 16,
+                color: primary,
+                fontFamily: 'Medium',
+              ),
+              if (roomTypes != null && roomTypes.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                TextWidget(
+                  text: 'Types: ${roomTypes.join(', ')}',
+                  fontSize: 14,
+                  color: grey,
+                  fontFamily: 'Regular',
+                ),
+              ],
+            ],
           ),
         ),
       ],
