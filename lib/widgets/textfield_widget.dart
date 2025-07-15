@@ -26,11 +26,13 @@ class TextFieldWidget extends StatefulWidget {
   late int? length;
 
   Widget? suffix;
+  Function(String)? onChanged;
 
   TextFieldWidget({
     super.key,
     required this.label,
     this.hint = '',
+    this.onChanged,
     required this.controller,
     this.isObscure = false,
     this.width = 300,
@@ -154,6 +156,7 @@ class _TextFieldWidgetState extends State<TextFieldWidget>
                 ],
               ),
               child: TextFormField(
+                onChanged: widget.onChanged,
                 maxLength: widget.length,
                 enabled: widget.enabled,
                 style: TextStyle(

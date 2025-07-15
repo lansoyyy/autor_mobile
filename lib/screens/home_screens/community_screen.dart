@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:autour_mobile/utils/colors.dart';
 import 'package:autour_mobile/widgets/text_widget.dart';
+import 'package:autour_mobile/widgets/button_widget.dart';
 
 class CommunityScreen extends StatelessWidget {
   const CommunityScreen({super.key});
@@ -12,7 +13,7 @@ class CommunityScreen extends StatelessWidget {
         'title': 'The Legend of Maria Aurora',
         'author': 'Lola Nena • Baler',
         'content':
-            'A tale passed down for generations about a young maiden who protected the forest. Her bravery symbolizes Aurora’s cultural strength.',
+            'A tale passed down for generations about a young maiden who protected the forest. Her bravery symbolizes Aurora\'s cultural strength.',
         'image':
             'https://outoftownblog.com/wp-content/uploads/2014/03/Dona-Aurora-Aragon-Quezon-House-600x398.jpg'
       },
@@ -38,7 +39,7 @@ class CommunityScreen extends StatelessWidget {
       {
         'title': 'Aurora Ancestral Languages',
         'description':
-            'Languages like Ilongot, Tagalog, and Kapampangan reflect Aurora’s identity. These preserve chants, rituals, and oral storytelling.',
+            'Languages like Ilongot, Tagalog, and Kapampangan reflect Aurora\'s identity. These preserve chants, rituals, and oral storytelling.',
       },
       {
         'title': 'Traditional Dances & Music',
@@ -46,9 +47,124 @@ class CommunityScreen extends StatelessWidget {
             'Enjoy performances of Pandanggo, Harana, and tribal drumming. These arts show the creativity and soul of the community.',
       },
       {
-        'title': 'Cultural Dos and Don’ts',
+        'title': 'Cultural Dos and Don\'ts',
         'description':
             'Respect rituals, remove shoes in sacred homes, greet elders with honor, and observe traditions with mindfulness.',
+      },
+    ];
+
+    final rulesAndRegulations = [
+      {
+        'title': 'Environmental Protection',
+        'items': [
+          'No littering in beaches, mountains, and public areas',
+          'Proper waste disposal in designated bins only',
+          'No collection of corals, shells, or marine life',
+          'Respect protected areas and wildlife sanctuaries',
+          'Follow designated trails in forest areas',
+        ]
+      },
+      {
+        'title': 'Cultural Respect',
+        'items': [
+          'Ask permission before taking photos of locals',
+          'Respect sacred sites and religious ceremonies',
+          'Dress modestly when visiting cultural sites',
+          'Learn basic greetings in local languages',
+          'Support local artisans and craftsmen',
+        ]
+      },
+      {
+        'title': 'Safety Guidelines',
+        'items': [
+          'Always inform local guides of your plans',
+          'Carry emergency contact information',
+          'Follow weather advisories and warnings',
+          'Stay on marked paths and designated areas',
+          'Respect swimming and diving restrictions',
+        ]
+      },
+      {
+        'title': 'Community Guidelines',
+        'items': [
+          'Support local businesses and services',
+          'Participate in community activities when invited',
+          'Respect quiet hours in residential areas',
+          'Learn about local customs and traditions',
+          'Contribute to community development projects',
+        ]
+      },
+    ];
+
+    final sustainabilityInfo = [
+      {
+        'title': 'Eco-Tourism Initiatives',
+        'description': 'Aurora promotes sustainable tourism practices that protect natural resources while supporting local communities.',
+        'initiatives': [
+          'Community-based tourism programs',
+          'Eco-friendly accommodation options',
+          'Local guide training and certification',
+          'Waste management and recycling programs',
+          'Renewable energy projects in remote areas',
+        ]
+      },
+      {
+        'title': 'Conservation Efforts',
+        'description': 'Active protection of Aurora\'s unique biodiversity and natural habitats.',
+        'initiatives': [
+          'Marine protected areas and sanctuaries',
+          'Forest conservation and reforestation',
+          'Wildlife protection and monitoring',
+          'Water resource management',
+          'Sustainable fishing practices',
+        ]
+      },
+      {
+        'title': 'Cultural Preservation',
+        'description': 'Safeguarding indigenous knowledge, traditions, and cultural heritage for future generations.',
+        'initiatives': [
+          'Traditional knowledge documentation',
+          'Cultural heritage site protection',
+          'Indigenous language preservation',
+          'Traditional craft revival programs',
+          'Cultural education and awareness',
+        ]
+      },
+    ];
+
+    final touristPreservation = [
+      {
+        'title': 'Responsible Tourism Practices',
+        'description': 'Guidelines for visitors to minimize environmental impact and support local communities.',
+        'practices': [
+          'Use eco-friendly transportation options',
+          'Choose locally-owned accommodations',
+          'Purchase souvenirs from local artisans',
+          'Respect wildlife and natural habitats',
+          'Participate in community-led tours',
+        ]
+      },
+      {
+        'title': 'Cultural Sensitivity',
+        'description': 'Understanding and respecting local customs, traditions, and social norms.',
+        'practices': [
+          'Learn about local customs before visiting',
+          'Dress appropriately for cultural sites',
+          'Ask permission before taking photos',
+          'Respect religious and spiritual practices',
+          'Support cultural preservation efforts',
+        ]
+      },
+      {
+        'title': 'Environmental Stewardship',
+        'description': 'Active participation in protecting Aurora\'s natural environment and resources.',
+        'practices': [
+          'Follow Leave No Trace principles',
+          'Use biodegradable and eco-friendly products',
+          'Conserve water and energy resources',
+          'Support environmental protection programs',
+          'Report environmental violations',
+        ]
       },
     ];
 
@@ -105,7 +221,7 @@ class CommunityScreen extends StatelessWidget {
           const SizedBox(height: 8),
           TextWidget(
             text:
-                'Aurora’s people actively preserve and promote their heritage. Through storytelling, eco-guiding, music, and tradition, locals keep their cultural identity alive while embracing eco-tourism.',
+                'Aurora\'s people actively preserve and promote their heritage. Through storytelling, eco-guiding, music, and tradition, locals keep their cultural identity alive while embracing eco-tourism.',
             fontSize: 14,
             color: grey,
             fontFamily: 'Regular',
@@ -129,6 +245,34 @@ class CommunityScreen extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           ...heritageItems.map((item) => _buildHeritageCard(item)).toList(),
+          const SizedBox(height: 24),
+          TextWidget(
+            text: 'Rules & Regulations',
+            fontSize: 20,
+            color: black,
+            fontFamily: 'Bold',
+          ),
+          const SizedBox(height: 12),
+          ...rulesAndRegulations.map((rule) => _buildRulesCard(rule)).toList(),
+          const SizedBox(height: 24),
+          TextWidget(
+            text: 'Sustainability Initiatives',
+            fontSize: 20,
+            color: black,
+            fontFamily: 'Bold',
+          ),
+          const SizedBox(height: 12),
+          ...sustainabilityInfo.map((info) => _buildSustainabilityCard(info)).toList(),
+          const SizedBox(height: 24),
+          TextWidget(
+            text: 'Tourist Preservation Guidelines',
+            fontSize: 20,
+            color: black,
+            fontFamily: 'Bold',
+          ),
+          const SizedBox(height: 12),
+          ...touristPreservation.map((preservation) => _buildPreservationCard(preservation)).toList(),
+          const SizedBox(height: 30),
         ],
       ),
     );
@@ -251,6 +395,155 @@ class CommunityScreen extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRulesCard(Map<String, dynamic> rule) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: secondary.withOpacity(0.1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextWidget(
+            text: rule['title']!,
+            fontSize: 18,
+            color: primary,
+            fontFamily: 'Bold',
+          ),
+          const SizedBox(height: 12),
+          ...rule['items']!.map((item) => _buildRuleItem(item)).toList(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRuleItem(String item) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.check_circle, color: primary, size: 20),
+          const SizedBox(width: 8),
+          Expanded(
+            child: TextWidget(
+              text: item,
+              fontSize: 14,
+              color: black,
+              fontFamily: 'Regular',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSustainabilityCard(Map<String, dynamic> info) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: secondary.withOpacity(0.1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextWidget(
+            text: info['title']!,
+            fontSize: 18,
+            color: primary,
+            fontFamily: 'Bold',
+          ),
+          const SizedBox(height: 12),
+          TextWidget(
+            text: info['description']!,
+            fontSize: 14,
+            color: black,
+            fontFamily: 'Regular',
+          ),
+          const SizedBox(height: 12),
+          ...info['initiatives']!.map((initiative) => _buildSustainabilityItem(initiative)).toList(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSustainabilityItem(String item) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.trending_up, color: primary, size: 20),
+          const SizedBox(width: 8),
+          Expanded(
+            child: TextWidget(
+              text: item,
+              fontSize: 14,
+              color: black,
+              fontFamily: 'Regular',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPreservationCard(Map<String, dynamic> preservation) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: secondary.withOpacity(0.1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextWidget(
+            text: preservation['title']!,
+            fontSize: 18,
+            color: primary,
+            fontFamily: 'Bold',
+          ),
+          const SizedBox(height: 12),
+          TextWidget(
+            text: preservation['description']!,
+            fontSize: 14,
+            color: black,
+            fontFamily: 'Regular',
+          ),
+          const SizedBox(height: 12),
+          ...preservation['practices']!.map((practice) => _buildPreservationItem(practice)).toList(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPreservationItem(String item) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.handshake, color: primary, size: 20),
+          const SizedBox(width: 8),
+          Expanded(
+            child: TextWidget(
+              text: item,
+              fontSize: 14,
+              color: black,
+              fontFamily: 'Regular',
+            ),
           ),
         ],
       ),

@@ -1,19 +1,26 @@
+import 'package:autour_mobile/screens/auth/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:autour_mobile/utils/colors.dart';
+import 'package:autour_mobile/utils/const.dart';
 import 'package:autour_mobile/widgets/text_widget.dart';
 import 'package:autour_mobile/widgets/button_widget.dart';
+import 'package:autour_mobile/widgets/textfield_widget.dart';
+import 'package:autour_mobile/widgets/drawer_widget.dart';
+import 'package:autour_mobile/widgets/logout_widget.dart';
 import 'package:autour_mobile/screens/home_screens/chatbot_screen.dart';
+import 'package:autour_mobile/screens/home_screens/common.dialects_screen.dart';
 import 'package:autour_mobile/screens/home_screens/community_screen.dart';
 import 'package:autour_mobile/screens/home_screens/disaster.preparedness_screen.dart';
+import 'package:autour_mobile/screens/home_screens/health.surveillance_screen.dart';
 import 'package:autour_mobile/screens/home_screens/local.businesses_screen.dart';
-import 'package:autour_mobile/screens/home_screens/travel.planner_screen.dart';
 import 'package:autour_mobile/screens/home_screens/qrcode.pass_screen.dart';
 import 'package:autour_mobile/screens/home_screens/tourism.guide_screen.dart';
-import 'package:autour_mobile/screens/home_screens/common.dialects_screen.dart';
-import 'package:autour_mobile/screens/home_screens/health.surveillance_screen.dart';
-import 'package:autour_mobile/widgets/logout_widget.dart';
-import 'package:autour_mobile/screens/auth/login_screen.dart';
+import 'package:autour_mobile/screens/home_screens/travel.planner_screen.dart';
+import 'package:autour_mobile/screens/itinerary_screen.dart';
+import 'package:autour_mobile/widgets/date_picker_widget.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:autour_mobile/screens/home_screens/emergency_hotlines_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -61,6 +68,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     _fadeAnimationController.forward();
     Future.delayed(const Duration(milliseconds: 300), () {
       _slideAnimationController.forward();
+    });
+    // Show location permission dialog after the widget is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _showLocationPermissionDialog();
     });
   }
 
@@ -191,7 +202,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         TextWidget(
-                          text: 'Explore Local Communities',
+                          text: 'Emergency Assistance',
                           fontSize: 22,
                           color: black,
                           fontFamily: 'Bold',
@@ -199,7 +210,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         const SizedBox(height: 12),
                         TextWidget(
                           text:
-                              'Discover the heart of Aurora through its people, heritage, and eco-conscious practices.',
+                              'Quick access to emergency hotlines, police, fire, medical, and disaster response services in Aurora.',
                           fontSize: 16,
                           color: grey,
                           fontFamily: 'Regular',
@@ -223,16 +234,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             color: Colors.transparent,
                             child: InkWell(
                               onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (_) => const CommunityScreen()),
-                                );
+                                _showEmergencyConfirmationDialog(context);
                               },
                               borderRadius: BorderRadius.circular(16),
                               child: Center(
                                 child: TextWidget(
-                                  text: 'Explore Community Stories',
+                                  text: 'Emergency',
                                   fontSize: 16,
                                   color: white,
                                   fontFamily: 'Bold',
@@ -496,6 +503,233 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           },
         );
       },
+    );
+  }
+
+  void _showEmergencyConfirmationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Row(
+            children: [
+              Icon(
+                Icons.emergency,
+                color: Colors.red,
+                size: 24,
+              ),
+              const SizedBox(width: 8),
+              TextWidget(
+                text: 'Emergency Hotlines',
+                fontSize: 20,
+                color: black,
+                fontFamily: 'Bold',
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextWidget(
+                text: 'Do you need emergency assistance?',
+                fontSize: 16,
+                color: black,
+                fontFamily: 'Medium',
+              ),
+              const SizedBox(height: 8),
+              TextWidget(
+                text:
+                    'This will show you all available emergency contact numbers that you can call immediately.',
+                fontSize: 14,
+                color: grey,
+                fontFamily: 'Regular',
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: TextWidget(
+                text: 'Cancel',
+                fontSize: 16,
+                color: grey,
+                fontFamily: 'Medium',
+              ),
+            ),
+            ButtonWidget(
+              label: 'Show Hotlines',
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const EmergencyHotlinesScreen(),
+                  ),
+                );
+              },
+              color: Colors.red,
+              textColor: white,
+              width: 120,
+              height: 40,
+              radius: 8,
+              fontSize: 14,
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showLocationPermissionDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.location_on,
+                  color: primary,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: TextWidget(
+                  text: 'Location Services',
+                  fontSize: 18,
+                  color: black,
+                  fontFamily: 'Bold',
+                ),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextWidget(
+                text: 'Location monitoring is enabled for:',
+                fontSize: 16,
+                color: black,
+                fontFamily: 'Medium',
+              ),
+              const SizedBox(height: 12),
+              _buildLocationFeature('📍 Real-time weather updates'),
+              _buildLocationFeature('🗺️ Nearby attractions and services'),
+              _buildLocationFeature('🚨 Emergency alerts and notifications'),
+              _buildLocationFeature('🎯 Personalized recommendations'),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: primary.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: primary.withOpacity(0.2)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.security,
+                      color: primary,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: TextWidget(
+                        text:
+                            'Your location data is secure and only used to enhance your experience in Aurora.',
+                        fontSize: 12,
+                        color: grey,
+                        fontFamily: 'Regular',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            ButtonWidget(
+              label: 'Got it!',
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              color: primary,
+              textColor: white,
+              width: 80,
+              height: 36,
+              radius: 8,
+              fontSize: 14,
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildLocationFeature(String feature) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Icon(
+            Icons.check_circle,
+            color: primary,
+            size: 16,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: TextWidget(
+              text: feature,
+              fontSize: 14,
+              color: black,
+              fontFamily: 'Regular',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSettingOption(String text, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: grey.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: grey.withOpacity(0.2)),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            color: primary,
+            size: 20,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: TextWidget(
+              text: text,
+              fontSize: 12,
+              color: black,
+              fontFamily: 'Regular',
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

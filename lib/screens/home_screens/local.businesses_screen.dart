@@ -20,12 +20,13 @@ class _LocalBusinessesScreenState extends State<LocalBusinessesScreen> {
     'All',
     'Accommodations',
     'Restaurants',
+    'Markets',
     'Transportation',
     'Services',
     'Tours',
   ];
 
-  final List<Map<String, String>> businesses = [
+  final List<Map<String, dynamic>> businesses = [
     {
       'name': 'Baler Beach Resort',
       'category': 'Accommodations',
@@ -45,6 +46,78 @@ class _LocalBusinessesScreenState extends State<LocalBusinessesScreen> {
       'hours': '8:00AM - 5:00PM'
     },
     {
+      'name': 'Baler Public Market',
+      'category': 'Markets',
+      'location': 'Baler, Aurora',
+      'description': 'Fresh local produce and goods at affordable prices.',
+      'phone': '09751000896',
+      'email': 'baler.eco@gmail.com.ph',
+      'hours': '6:00AM - 6:00PM',
+      'prices': {
+        'Vegetables': {
+          'Tomatoes': '₱80/kg',
+          'Onions': '₱60/kg',
+          'Garlic': '₱120/kg',
+          'Potatoes': '₱70/kg',
+          'Carrots': '₱90/kg',
+          'Cabbage': '₱50/kg',
+        },
+        'Fruits': {
+          'Bananas': '₱40/kg',
+          'Mangoes': '₱120/kg',
+          'Pineapples': '₱80/piece',
+          'Oranges': '₱100/kg',
+          'Apples': '₱150/kg',
+        },
+        'Meat & Fish': {
+          'Pork': '₱280/kg',
+          'Chicken': '₱180/kg',
+          'Fish (Tuna)': '₱200/kg',
+          'Shrimp': '₱350/kg',
+        },
+        'Grains': {
+          'Rice': '₱45/kg',
+          'Corn': '₱25/kg',
+        }
+      }
+    },
+    {
+      'name': 'Maria Aurora Market',
+      'category': 'Markets',
+      'location': 'Maria Aurora, Aurora',
+      'description': 'Local market with fresh produce and household items.',
+      'phone': '09751000896',
+      'email': 'baler.eco@gmail.com.ph',
+      'hours': '5:00AM - 7:00PM',
+      'prices': {
+        'Vegetables': {
+          'Tomatoes': '₱75/kg',
+          'Onions': '₱55/kg',
+          'Garlic': '₱110/kg',
+          'Potatoes': '₱65/kg',
+          'Carrots': '₱85/kg',
+          'Cabbage': '₱45/kg',
+        },
+        'Fruits': {
+          'Bananas': '₱35/kg',
+          'Mangoes': '₱110/kg',
+          'Pineapples': '₱75/piece',
+          'Oranges': '₱90/kg',
+          'Apples': '₱140/kg',
+        },
+        'Meat & Fish': {
+          'Pork': '₱270/kg',
+          'Chicken': '₱170/kg',
+          'Fish (Tuna)': '₱190/kg',
+          'Shrimp': '₱330/kg',
+        },
+        'Grains': {
+          'Rice': '₱42/kg',
+          'Corn': '₱22/kg',
+        }
+      }
+    },
+    {
       'name': 'Baler Bus Terminal',
       'category': 'Transportation',
       'location': 'Baler, Aurora',
@@ -52,6 +125,42 @@ class _LocalBusinessesScreenState extends State<LocalBusinessesScreen> {
       'phone': '09751000896',
       'email': 'baler.eco@gmail.com.ph',
       'hours': '8:00AM - 5:00PM'
+    },
+    {
+      'name': 'Baler Tricycle Services',
+      'category': 'Transportation',
+      'location': 'Baler, Aurora',
+      'description': 'Reliable tricycle transportation around Baler.',
+      'phone': '09751000896',
+      'email': 'baler.eco@gmail.com.ph',
+      'hours': '6:00AM - 10:00PM',
+      'fares': {
+        'Short Distance (1-2 km)': '₱15',
+        'Medium Distance (2-5 km)': '₱25',
+        'Long Distance (5-10 km)': '₱40',
+        'Airport Transfer': '₱100',
+        'Beach Transfer': '₱30',
+        'Market Transfer': '₱20',
+        'Night Fare (10PM-6AM)': '+₱10',
+        'Additional Passenger': '+₱5',
+      }
+    },
+    {
+      'name': 'San Luis Tricycle Services',
+      'category': 'Transportation',
+      'location': 'San Luis, Aurora',
+      'description': 'Tricycle services in San Luis area.',
+      'phone': '09751000896',
+      'email': 'baler.eco@gmail.com.ph',
+      'hours': '6:00AM - 9:00PM',
+      'fares': {
+        'Short Distance (1-2 km)': '₱12',
+        'Medium Distance (2-5 km)': '₱20',
+        'Long Distance (5-10 km)': '₱35',
+        'Town Center Transfer': '₱15',
+        'Night Fare (9PM-6AM)': '+₱8',
+        'Additional Passenger': '+₱3',
+      }
     },
     {
       'name': 'Eco Tours Aurora',
@@ -73,7 +182,7 @@ class _LocalBusinessesScreenState extends State<LocalBusinessesScreen> {
     },
   ];
 
-  List<Map<String, String>> get filteredBusinesses {
+  List<Map<String, dynamic>> get filteredBusinesses {
     return businesses.where((business) {
       final matchesCategory =
           selectedCategory == 'All' || business['category'] == selectedCategory;
@@ -133,11 +242,11 @@ class _LocalBusinessesScreenState extends State<LocalBusinessesScreen> {
               radius: 8,
               hasValidator: false,
               inputType: TextInputType.text,
-              // onChanged: (value) {
-              //   setState(() {
-              //     searchQuery = value;
-              //   });
-              // },
+              onChanged: (value) {
+                setState(() {
+                  searchQuery = value;
+                });
+              },
               prefix: const Icon(Icons.search, color: grey),
             ),
           ),
@@ -326,7 +435,7 @@ class _LocalBusinessesScreenState extends State<LocalBusinessesScreen> {
 }
 
 class BusinessDetailScreen extends StatelessWidget {
-  final Map<String, String> business;
+  final Map<String, dynamic> business;
 
   const BusinessDetailScreen({super.key, required this.business});
 
@@ -405,9 +514,20 @@ class BusinessDetailScreen extends StatelessWidget {
                   Icons.location_on, 'Location', business['location']),
               _buildDetailRow(Icons.phone, 'Phone', business['phone']),
               _buildDetailRow(Icons.email, 'Email', business['email']),
-
               _buildDetailRow(
                   Icons.access_time, 'Business Hours', business['hours']),
+
+              const SizedBox(height: 24),
+
+              // Prices Section (for Markets)
+              if (business['category'] == 'Markets' &&
+                  business['prices'] != null)
+                _buildPricesSection(),
+
+              // Fares Section (for Transportation)
+              if (business['category'] == 'Transportation' &&
+                  business['fares'] != null)
+                _buildFaresSection(),
 
               const SizedBox(height: 24),
 
@@ -479,6 +599,123 @@ class BusinessDetailScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  // Build prices section for markets
+  Widget _buildPricesSection() {
+    final prices = business['prices'] as Map<String, dynamic>;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextWidget(
+          text: 'Product Prices',
+          fontSize: 18,
+          color: black,
+          fontFamily: 'Bold',
+        ),
+        const SizedBox(height: 12),
+        ...prices.entries.map(
+            (category) => _buildPriceCategory(category.key, category.value)),
+      ],
+    );
+  }
+
+  // Build price category
+  Widget _buildPriceCategory(String categoryName, Map<String, dynamic> items) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: grey.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: primary.withOpacity(0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextWidget(
+            text: categoryName,
+            fontSize: 16,
+            color: primary,
+            fontFamily: 'Bold',
+          ),
+          const SizedBox(height: 8),
+          ...items.entries.map((item) => Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextWidget(
+                      text: item.key,
+                      fontSize: 14,
+                      color: black,
+                      fontFamily: 'Regular',
+                    ),
+                    TextWidget(
+                      text: item.value,
+                      fontSize: 14,
+                      color: primary,
+                      fontFamily: 'Bold',
+                    ),
+                  ],
+                ),
+              )),
+        ],
+      ),
+    );
+  }
+
+  // Build fares section for transportation
+  Widget _buildFaresSection() {
+    final fares = business['fares'] as Map<String, dynamic>;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextWidget(
+          text: 'Transportation Fares',
+          fontSize: 18,
+          color: black,
+          fontFamily: 'Bold',
+        ),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: grey.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: primary.withOpacity(0.3)),
+          ),
+          child: Column(
+            children: fares.entries
+                .map((fare) => Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: TextWidget(
+                              text: fare.key,
+                              fontSize: 14,
+                              color: black,
+                              fontFamily: 'Regular',
+                            ),
+                          ),
+                          TextWidget(
+                            text: fare.value,
+                            fontSize: 14,
+                            color: primary,
+                            fontFamily: 'Bold',
+                          ),
+                        ],
+                      ),
+                    ))
+                .toList(),
+          ),
+        ),
+      ],
     );
   }
 }
