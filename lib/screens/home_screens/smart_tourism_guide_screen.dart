@@ -11,22 +11,8 @@ class SmartTourismGuideScreen extends StatefulWidget {
       _SmartTourismGuideScreenState();
 }
 
-class _SmartTourismGuideScreenState extends State<SmartTourismGuideScreen>
-    with SingleTickerProviderStateMixin {
+class _SmartTourismGuideScreenState extends State<SmartTourismGuideScreen> {
   String selectedActivity = 'All Activities';
-  late TabController _tabController;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
 
   final List<Map<String, dynamic>> activities = [
     {
@@ -212,207 +198,103 @@ class _SmartTourismGuideScreenState extends State<SmartTourismGuideScreen>
       ),
       body: Column(
         children: [
-          // Tab Bar
+          // Header with Safety Overview
           Container(
-            color: primary,
-            child: TabBar(
-              controller: _tabController,
-              indicatorColor: white,
-              labelColor: white,
-              unselectedLabelColor: white.withOpacity(0.7),
-              tabs: [
-                Tab(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.map, size: 20),
-                      const SizedBox(width: 8),
-                      TextWidget(
-                        text: 'Map',
-                        fontSize: 14,
-                        color: white,
-                        fontFamily: 'Medium',
-                      ),
-                    ],
-                  ),
-                ),
-                Tab(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.safety_divider, size: 20),
-                      const SizedBox(width: 8),
-                      TextWidget(
-                        text: 'Safety Guide',
-                        fontSize: 14,
-                        color: white,
-                        fontFamily: 'Medium',
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Tab Views
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                // Map Tab
-                _buildMapTab(),
-                // Safety Guide Tab
-                _buildSafetyGuideTab(),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMapTab() {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          TextWidget(
-            text: 'Interactive Tourism Map',
-            fontSize: 20,
-            color: black,
-            fontFamily: 'Bold',
-          ),
-          const SizedBox(height: 8),
-          TextWidget(
-            text:
-                'Explore eco-tourism sites, historical landmarks, and emergency zones through a dynamic and GPS-integrated map.',
-            fontSize: 14,
-            color: grey,
-            fontFamily: 'Regular',
-          ),
-          const SizedBox(height: 20),
-          Expanded(
-            child: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: grey.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: grey.withOpacity(0.3)),
-              ),
-              child: const Center(
-                child: Text(
-                  'Map Placeholder\n(Google Maps integration coming soon)',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey, fontSize: 16),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSafetyGuideTab() {
-    return Column(
-      children: [
-        // Header with Safety Overview
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: primary.withOpacity(0.1),
-            border: Border(
-              bottom: BorderSide(color: primary.withOpacity(0.2)),
-            ),
-          ),
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  Icon(
-                    Icons.safety_divider,
-                    color: primary,
-                    size: 24,
-                  ),
-                  const SizedBox(width: 8),
-                  TextWidget(
-                    text: 'Risk Detection & Safety Alerts',
-                    fontSize: 16,
-                    color: black,
-                    fontFamily: 'Bold',
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              TextWidget(
-                text:
-                    'Real-time safety notifications for your activities in Aurora',
-                fontSize: 12,
-                color: grey,
-                fontFamily: 'Regular',
-              ),
-            ],
-          ),
-        ),
-
-        // Activity Filter
-        Container(
-          height: 50,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: [
-              'All Activities',
-              ...activities.map((a) => a['name']).toList()
-            ].length,
-            itemBuilder: (context, index) {
-              final activity =
-                  index == 0 ? 'All Activities' : activities[index - 1]['name'];
-              final isSelected = selectedActivity == activity;
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      selectedActivity = activity;
-                    });
-                  },
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: isSelected ? primary : grey.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: isSelected ? primary : grey),
-                    ),
-                    child: TextWidget(
-                      text: activity,
-                      fontSize: 12,
-                      color: isSelected ? white : black,
-                      fontFamily: isSelected ? 'Bold' : 'Regular',
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-
-        // Activities List
-        Expanded(
-          child: ListView.builder(
+            width: double.infinity,
             padding: const EdgeInsets.all(16),
-            itemCount: filteredActivities.length,
-            itemBuilder: (context, index) {
-              final activity = filteredActivities[index];
-              return _buildActivityCard(activity);
-            },
+            decoration: BoxDecoration(
+              color: primary.withOpacity(0.1),
+              border: Border(
+                bottom: BorderSide(color: primary.withOpacity(0.2)),
+              ),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      Icons.safety_divider,
+                      color: primary,
+                      size: 24,
+                    ),
+                    const SizedBox(width: 8),
+                    TextWidget(
+                      text: 'Risk Detection & Safety Alerts',
+                      fontSize: 16,
+                      color: black,
+                      fontFamily: 'Bold',
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                TextWidget(
+                  text:
+                      'Real-time safety notifications for your activities in Aurora',
+                  fontSize: 12,
+                  color: grey,
+                  fontFamily: 'Regular',
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
+
+          // Activity Filter
+          Container(
+            height: 50,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: [
+                'All Activities',
+                ...activities.map((a) => a['name']).toList()
+              ].length,
+              itemBuilder: (context, index) {
+                final activity = index == 0
+                    ? 'All Activities'
+                    : activities[index - 1]['name'];
+                final isSelected = selectedActivity == activity;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        selectedActivity = activity;
+                      });
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: isSelected ? primary : grey.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: isSelected ? primary : grey),
+                      ),
+                      child: TextWidget(
+                        text: activity,
+                        fontSize: 12,
+                        color: isSelected ? white : black,
+                        fontFamily: isSelected ? 'Bold' : 'Regular',
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+
+          // Activities List
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: filteredActivities.length,
+              itemBuilder: (context, index) {
+                final activity = filteredActivities[index];
+                return _buildActivityCard(activity);
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -594,7 +476,7 @@ class _SmartTourismGuideScreenState extends State<SmartTourismGuideScreen>
                   children: [
                     Expanded(
                       child: ButtonWidget(
-                        label: 'View',
+                        label: 'View Details',
                         onPressed: () => _showActivityDetails(activity),
                         color: activity['color'],
                         textColor: white,

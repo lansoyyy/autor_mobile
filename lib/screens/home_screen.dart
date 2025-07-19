@@ -253,6 +253,129 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   ),
 
                   const SizedBox(height: 30),
+
+                  // AI-Powered Risk Detection & Alert Delivery
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Colors.orange.withOpacity(0.1),
+                          Colors.red.withOpacity(0.05),
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.orange.withOpacity(0.3)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.orange.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Icon(
+                                Icons.psychology,
+                                color: Colors.orange,
+                                size: 24,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  TextWidget(
+                                    text: 'AI-Powered Risk Detection',
+                                    fontSize: 18,
+                                    color: black,
+                                    fontFamily: 'Bold',
+                                  ),
+                                  TextWidget(
+                                    text:
+                                        'Real-time safety alerts based on your location',
+                                    fontSize: 12,
+                                    color: grey,
+                                    fontFamily: 'Regular',
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Active Alerts
+                        _buildActiveAlert(
+                          'Swimming at Mother Falls',
+                          'Reminder: Sudden water surges may occur at Mother Falls during heavy rain. Please avoid swimming during red alert conditions.',
+                          Icons.pool,
+                          Colors.blue,
+                          'High Risk',
+                          '2 minutes ago',
+                        ),
+
+                        const SizedBox(height: 12),
+
+                        _buildActiveAlert(
+                          'Picnic near Landslide Zone',
+                          'You\'re picnicking near a landslide-prone zone. Please stay alert for falling rocks and avoid setting up near steep slopes.',
+                          Icons.table_bar,
+                          Colors.orange,
+                          'Medium Risk',
+                          '5 minutes ago',
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        Row(
+                          children: [
+                            Expanded(
+                              child: ButtonWidget(
+                                label: 'View',
+                                onPressed: () {
+                                  _showAllRiskAlerts();
+                                },
+                                color: Colors.orange,
+                                textColor: white,
+                                height: 40,
+                                radius: 8,
+                                fontSize: 14,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            ButtonWidget(
+                              width: 250,
+                              label: 'Safety Guide',
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        const SmartTourismGuideScreen(),
+                                  ),
+                                );
+                              },
+                              color: primary,
+                              textColor: white,
+                              height: 40,
+                              radius: 8,
+                              fontSize: 14,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 30),
                 ],
               ),
             ),
@@ -730,6 +853,112 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildActiveAlert(String title, String message, IconData icon,
+      Color color, String riskLevel, String timeAgo) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              icon,
+              color: color,
+              size: 28,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextWidget(
+                  text: title,
+                  fontSize: 16,
+                  color: black,
+                  fontFamily: 'Bold',
+                ),
+                const SizedBox(height: 4),
+                TextWidget(
+                  text: message,
+                  fontSize: 14,
+                  color: grey,
+                  fontFamily: 'Regular',
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              TextWidget(
+                text: riskLevel,
+                fontSize: 12,
+                color: color,
+                fontFamily: 'Bold',
+              ),
+              const SizedBox(height: 4),
+              TextWidget(
+                text: timeAgo,
+                fontSize: 10,
+                color: grey,
+                fontFamily: 'Regular',
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showAllRiskAlerts() {
+    // This method will navigate to a dedicated risk alerts screen
+    // For now, we'll just show a simple dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: TextWidget(
+            text: 'Risk Alerts',
+            fontSize: 20,
+            color: black,
+            fontFamily: 'Bold',
+          ),
+          content: TextWidget(
+            text:
+                'This feature is under development. Please check back later for more details.',
+            fontSize: 16,
+            color: grey,
+            fontFamily: 'Regular',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: TextWidget(
+                text: 'OK',
+                fontSize: 16,
+                color: primary,
+                fontFamily: 'Medium',
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
