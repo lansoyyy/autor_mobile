@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "466685065267",
+    "project_id": "autour-b3ded",
+    "storage_bucket": "autour-b3ded.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:466685065267:android:ff4a33ffa2207ba082cb46",
+        "android_client_info": {
+          "package_name": "com.example.autour_mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCxvsEM8QqZVa9PF-Lcnd0F8jrSNb-6mdg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
