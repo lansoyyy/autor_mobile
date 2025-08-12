@@ -1,5 +1,9 @@
 import 'package:autour_mobile/screens/auth/login_screen.dart';
 import 'package:flutter/material.dart';
+import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:autour_mobile/utils/colors.dart';
 import 'package:autour_mobile/utils/const.dart';
@@ -34,6 +38,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late AnimationController _slideAnimationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
+  Timer? _locationTimer;
 
   @override
   void initState() {
@@ -69,9 +74,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     Future.delayed(const Duration(milliseconds: 300), () {
       _slideAnimationController.forward();
     });
-    // Show location permission dialog after the widget is built
+    // Show location info and enforce location services/permission after build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _showLocationPermissionDialog();
+      _initLocationEnforcement();
     });
   }
 
@@ -79,6 +85,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void dispose() {
     _fadeAnimationController.dispose();
     _slideAnimationController.dispose();
+    _stopLocationUpdates();
     super.dispose();
   }
 
@@ -960,5 +967,194 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         );
       },
     );
+  }
+
+  // Ensure location services and permission before starting updates
+  Future<void> _initLocationEnforcement() async {
+    final ok = await _requireLocationServiceAndPermission();
+    if (ok) {
+      _startLocationUpdates();
+    }
+  }
+
+  // Periodic location updates every 1 minute to Firestore
+  void _startLocationUpdates() {
+    // Run once immediately
+    _updateLocationOnce();
+    // Then schedule every minute
+    _locationTimer?.cancel();
+    _locationTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      _updateLocationOnce();
+    });
+  }
+
+  void _stopLocationUpdates() {
+    _locationTimer?.cancel();
+    _locationTimer = null;
+  }
+
+  Future<void> _updateLocationOnce() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user == null) return; // not logged in
+
+      final hasPermission = await _ensureLocationPermission();
+      if (!hasPermission) return;
+
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) return;
+
+      final pos = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          distanceFilter: 10,
+          timeLimit: Duration(minutes: 1),
+        ),
+      );
+
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+        'latitude': pos.latitude,
+        'longitude': pos.longitude,
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+    } catch (e) {
+      // Fail silently to avoid interrupting UI; could add debug logs if needed
+    }
+  }
+
+  Future<bool> _ensureLocationPermission() async {
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+    }
+    if (permission == LocationPermission.deniedForever ||
+        permission == LocationPermission.denied) {
+      return false;
+    }
+    return true;
+  }
+
+  // Force user to enable location services and grant permission
+  Future<bool> _requireLocationServiceAndPermission() async {
+    // 1) Ensure services enabled
+    for (int i = 0; i < 3; i++) {
+      final enabled = await Geolocator.isLocationServiceEnabled();
+      if (enabled) break;
+
+      final proceed = await _showEnableLocationDialog();
+      if (!proceed) return false;
+      await Geolocator.openLocationSettings();
+      await Future.delayed(const Duration(seconds: 2));
+    }
+
+    if (!await Geolocator.isLocationServiceEnabled()) {
+      return false;
+    }
+
+    // 2) Ensure permission granted
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+    }
+    if (permission == LocationPermission.deniedForever) {
+      final opened = await _showOpenAppSettingsDialog();
+      if (!opened) return false;
+      await Geolocator.openAppSettings();
+      await Future.delayed(const Duration(seconds: 2));
+      permission = await Geolocator.checkPermission();
+    }
+    return permission == LocationPermission.always ||
+        permission == LocationPermission.whileInUse;
+  }
+
+  Future<bool> _showEnableLocationDialog() async {
+    return await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) {
+            return AlertDialog(
+              title: TextWidget(
+                text: 'Enable Location',
+                fontSize: 18,
+                color: black,
+                fontFamily: 'Bold',
+              ),
+              content: TextWidget(
+                text:
+                    'Location services are required. Please enable your phone\'s location.',
+                fontSize: 14,
+                color: black,
+                fontFamily: 'Regular',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: TextWidget(
+                    text: 'Cancel',
+                    fontSize: 14,
+                    color: grey,
+                    fontFamily: 'Medium',
+                  ),
+                ),
+                ButtonWidget(
+                  label: 'Open Settings',
+                  onPressed: () => Navigator.pop(context, true),
+                  color: primary,
+                  textColor: white,
+                  height: 40,
+                  radius: 8,
+                  fontSize: 14,
+                ),
+              ],
+            );
+          },
+        ) ??
+        false;
+  }
+
+  Future<bool> _showOpenAppSettingsDialog() async {
+    return await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) {
+            return AlertDialog(
+              title: TextWidget(
+                text: 'Grant Location Permission',
+                fontSize: 18,
+                color: black,
+                fontFamily: 'Bold',
+              ),
+              content: TextWidget(
+                text:
+                    'This app needs location permission. Please enable it in Settings.',
+                fontSize: 14,
+                color: black,
+                fontFamily: 'Regular',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: TextWidget(
+                    text: 'Cancel',
+                    fontSize: 14,
+                    color: grey,
+                    fontFamily: 'Medium',
+                  ),
+                ),
+                ButtonWidget(
+                  label: 'Open Settings',
+                  onPressed: () => Navigator.pop(context, true),
+                  color: primary,
+                  textColor: white,
+                  height: 40,
+                  radius: 8,
+                  fontSize: 14,
+                ),
+              ],
+            );
+          },
+        ) ??
+        false;
   }
 }

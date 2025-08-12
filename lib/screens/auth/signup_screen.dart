@@ -2,8 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:autour_mobile/screens/auth/login_screen.dart';
 import 'package:autour_mobile/utils/colors.dart';
 import 'package:autour_mobile/widgets/text_widget.dart';
-import 'package:autour_mobile/widgets/button_widget.dart';
+// import 'package:autour_mobile/widgets/button_widget.dart'; // unused
 import 'package:autour_mobile/widgets/textfield_widget.dart';
+import 'package:autour_mobile/widgets/toast_widget.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:autour_mobile/screens/home_screen.dart';
+import 'package:geolocator/geolocator.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -119,30 +124,208 @@ class _SignUpScreenState extends State<SignUpScreen>
   Future<void> _handleSignUp() async {
     if (!_formKey.currentState!.validate()) return;
 
+    // Enforce location services and permission before proceeding
+    final allow = await _requireLocationServiceAndPermission();
+    if (!allow) {
+      await showToast('Please enable location services and grant permission.');
+      return;
+    }
+
     setState(() {
       _isLoading = true;
     });
 
-    // Simulate API call
-    await Future.delayed(const Duration(seconds: 2));
-
-    if (mounted) {
-      setState(() {
-        _isLoading = false;
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: TextWidget(
-            text: 'Account created successfully!',
-            fontSize: 14,
-            color: white,
-          ),
-          backgroundColor: primary,
-          duration: const Duration(seconds: 2),
-        ),
+    // Obtain current location (required)
+    double? lat;
+    double? lng;
+    try {
+      final pos = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
       );
+      lat = pos.latitude;
+      lng = pos.longitude;
+    } catch (_) {
+      // If still failing, stop and inform user
+      await showToast('Unable to get current location. Please try again.');
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+      return;
     }
+
+    try {
+      // 1) Create auth account
+      final cred = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text,
+      );
+
+      final uid = cred.user!.uid;
+
+      // 2) Create Firestore user profile with complete details
+      final now = FieldValue.serverTimestamp();
+      await FirebaseFirestore.instance.collection('users').doc(uid).set({
+        'fullName': fullNameController.text.trim(),
+        'dob': dobController.text.trim(),
+        'nationality': nationalityController.text.trim(),
+        'email': emailController.text.trim(),
+        'mobile': mobileController.text.trim(),
+        'emergencyContactName': emergencyNameController.text.trim(),
+        'emergencyContactNumber': emergencyNumberController.text.trim(),
+        'medicalConditions': medicalConditionsController.text.trim(),
+        'address': addressController.text.trim(),
+        'latitude': lat,
+        'longitude': lng,
+        'preferences': selectedPreferences,
+        'sustainability': selectedSustainability,
+        'role': 'user',
+        'createdAt': now,
+        'updatedAt': now,
+      }, SetOptions(merge: true));
+
+      if (!mounted) return;
+      // Navigate to Home after successful sign up
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        (route) => false,
+      );
+    } on FirebaseAuthException catch (e) {
+      await showToast(e.message ?? 'Failed to create account');
+    } catch (e) {
+      await showToast('Unexpected error. Please try again.');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  // Force user to enable location services and grant permission
+  Future<bool> _requireLocationServiceAndPermission() async {
+    // Ensure services enabled (give multiple chances to open settings)
+    for (int i = 0; i < 3; i++) {
+      final enabled = await Geolocator.isLocationServiceEnabled();
+      if (enabled) break;
+
+      final proceed = await _showEnableLocationDialog();
+      if (!proceed) return false;
+      await Geolocator.openLocationSettings();
+      await Future.delayed(const Duration(seconds: 2));
+    }
+
+    if (!await Geolocator.isLocationServiceEnabled()) {
+      return false;
+    }
+
+    // Ensure permission granted
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+    }
+    if (permission == LocationPermission.deniedForever) {
+      final opened = await _showOpenAppSettingsDialog();
+      if (!opened) return false;
+      await Geolocator.openAppSettings();
+      await Future.delayed(const Duration(seconds: 2));
+      permission = await Geolocator.checkPermission();
+    }
+    return permission == LocationPermission.always ||
+        permission == LocationPermission.whileInUse;
+  }
+
+  Future<bool> _showEnableLocationDialog() async {
+    return await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) {
+            return AlertDialog(
+              title: TextWidget(
+                text: 'Enable Location',
+                fontSize: 18,
+                color: black,
+                fontFamily: 'Bold',
+              ),
+              content: TextWidget(
+                text:
+                    'Location services are required to sign up. Please enable your phone\'s location.',
+                fontSize: 14,
+                color: black,
+                fontFamily: 'Regular',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: TextWidget(
+                    text: 'Cancel',
+                    fontSize: 14,
+                    color: grey,
+                    fontFamily: 'Medium',
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  child: TextWidget(
+                    text: 'Open Settings',
+                    fontSize: 14,
+                    color: primary,
+                    fontFamily: 'Bold',
+                  ),
+                ),
+              ],
+            );
+          },
+        ) ??
+        false;
+  }
+
+  Future<bool> _showOpenAppSettingsDialog() async {
+    return await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) {
+            return AlertDialog(
+              title: TextWidget(
+                text: 'Grant Location Permission',
+                fontSize: 18,
+                color: black,
+                fontFamily: 'Bold',
+              ),
+              content: TextWidget(
+                text:
+                    'This app needs location permission to continue. Please enable it in Settings.',
+                fontSize: 14,
+                color: black,
+                fontFamily: 'Regular',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: TextWidget(
+                    text: 'Cancel',
+                    fontSize: 14,
+                    color: grey,
+                    fontFamily: 'Medium',
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  child: TextWidget(
+                    text: 'Open Settings',
+                    fontSize: 14,
+                    color: primary,
+                    fontFamily: 'Bold',
+                  ),
+                ),
+              ],
+            );
+          },
+        ) ??
+        false;
   }
 
   Widget _buildSectionHeader(String title) {
@@ -498,13 +681,11 @@ class _SignUpScreenState extends State<SignUpScreen>
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 errorBorder: OutlineInputBorder(
-                                  borderSide:
-                                      const BorderSide(color: Colors.red),
+                                  borderSide: const BorderSide(color: Colors.red),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 focusedErrorBorder: OutlineInputBorder(
-                                  borderSide:
-                                      const BorderSide(color: Colors.red),
+                                  borderSide: const BorderSide(color: Colors.red),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                               ),
@@ -574,13 +755,11 @@ class _SignUpScreenState extends State<SignUpScreen>
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 errorBorder: OutlineInputBorder(
-                                  borderSide:
-                                      const BorderSide(color: Colors.red),
+                                  borderSide: const BorderSide(color: Colors.red),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 focusedErrorBorder: OutlineInputBorder(
-                                  borderSide:
-                                      const BorderSide(color: Colors.red),
+                                  borderSide: const BorderSide(color: Colors.red),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                               ),

@@ -1,10 +1,12 @@
 import 'package:autour_mobile/screens/auth/signup_screen.dart';
 import 'package:autour_mobile/screens/home_screen.dart';
 import 'package:autour_mobile/utils/colors.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:autour_mobile/widgets/text_widget.dart';
 import 'package:autour_mobile/widgets/button_widget.dart';
 import 'package:autour_mobile/widgets/textfield_widget.dart';
+import 'package:autour_mobile/widgets/toast_widget.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -87,19 +89,29 @@ class _LoginScreenState extends State<LoginScreen>
       _isLoading = true;
     });
 
-    // Simulate API call
-    await Future.delayed(const Duration(seconds: 2));
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text,
+      );
 
-    if (mounted) {
-      setState(() {
-        _isLoading = false;
-      });
-
+      if (!mounted) return;
+      // authStateChanges() in main.dart will route to HomeScreen, but we'll be explicit
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => const HomeScreen()),
         (route) => false,
       );
+    } on FirebaseAuthException catch (e) {
+      await showToast(e.message ?? 'Failed to sign in');
+    } catch (e) {
+      await showToast('Unexpected error. Please try again.');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 

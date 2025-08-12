@@ -1,4 +1,5 @@
 import 'package:autour_mobile/screens/auth/login_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 logout(BuildContext context, Widget navigationRoute) {
@@ -24,8 +25,14 @@ logout(BuildContext context, Widget navigationRoute) {
               ),
               MaterialButton(
                 onPressed: () async {
-                  Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (context) => LoginScreen()));
+                  try {
+                    await FirebaseAuth.instance.signOut();
+                  } catch (_) {}
+                  if (context.mounted) {
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (context) => LoginScreen()),
+                    );
+                  }
                 },
                 child: const Text(
                   'Continue',
