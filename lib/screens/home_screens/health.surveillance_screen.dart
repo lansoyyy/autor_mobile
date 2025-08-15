@@ -3,6 +3,8 @@ import 'package:autour_mobile/utils/colors.dart';
 import 'package:autour_mobile/widgets/text_widget.dart';
 import 'package:autour_mobile/widgets/button_widget.dart';
 import 'package:autour_mobile/widgets/textfield_widget.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class HealthSurveillanceScreen extends StatefulWidget {
   const HealthSurveillanceScreen({super.key});
@@ -20,7 +22,8 @@ class _HealthSurveillanceScreenState extends State<HealthSurveillanceScreen> {
   final TextEditingController vaccinationController = TextEditingController();
   bool hasSymptoms = false;
   bool hasExposure = false;
-  bool isSubmitted = false;
+  bool _submitting = false;
+  String? _profileName;
 
   @override
   void dispose() {
@@ -29,6 +32,125 @@ class _HealthSurveillanceScreenState extends State<HealthSurveillanceScreen> {
     exposureController.dispose();
     vaccinationController.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfileName();
+  }
+
+  Future<void> _loadProfileName() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+      // Try to read user's profile document
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      final data = doc.data();
+      if (data != null) {
+        final name = (data['fullName'] ?? data['name'] ?? '').toString();
+        if (name.isNotEmpty) {
+          setState(() => _profileName = name);
+        }
+      }
+      // Fallback to auth displayName if profile has no name
+      if (_profileName == null || _profileName!.isEmpty) {
+        final dn = user.displayName;
+        if (dn != null && dn.isNotEmpty) {
+          setState(() => _profileName = dn);
+        }
+      }
+    } catch (_) {
+      // Non-fatal; keep name null
+    }
+  }
+
+  Future<void> _submit() async {
+    final scaffold = ScaffoldMessenger.of(context);
+    if (!_formKey.currentState!.validate()) return;
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      scaffold.showSnackBar(SnackBar(
+        content: TextWidget(
+            text: 'Please login to submit.', fontSize: 14, color: white),
+        backgroundColor: Colors.red,
+      ));
+      return;
+    }
+    setState(() => _submitting = true);
+    try {
+      final uid = user.uid;
+      final name = _profileName ?? uid;
+      final tempStr = temperatureController.text.trim();
+      final tempVal = double.tryParse(tempStr);
+      // Convert comma-separated symptoms to a clean list, or save string if empty
+      List<String>? symptomsList;
+      String symptomsStr = 'None';
+      if (hasSymptoms) {
+        final raw = symptomsController.text.trim();
+        if (raw.isNotEmpty) {
+          final parts = raw.split(',');
+          symptomsList =
+              parts.map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+          symptomsStr = symptomsList.isEmpty ? 'None' : symptomsList.join(', ');
+        }
+      }
+      final exposure = hasExposure
+          ? (exposureController.text.trim().isEmpty
+              ? 'Exposure reported'
+              : exposureController.text.trim())
+          : 'None';
+      final vaccination = vaccinationController.text.trim().isEmpty
+          ? 'Not Provided'
+          : vaccinationController.text.trim();
+
+      final data = <String, dynamic>{
+        'userId': uid,
+        'name': name,
+        'fullName': name,
+        'temperature': tempStr,
+        'temp': tempVal,
+        'symptoms': symptomsList ?? symptomsStr,
+        'exposure': exposure,
+        'vaccination': vaccination,
+        'createdAt': FieldValue.serverTimestamp(),
+        'submittedAt': FieldValue.serverTimestamp(),
+      };
+
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .collection('health_declarations')
+          .add(data);
+
+      scaffold.showSnackBar(SnackBar(
+        content: TextWidget(
+            text: 'Health declaration submitted', fontSize: 14, color: white),
+        backgroundColor: primary,
+        duration: const Duration(seconds: 2),
+      ));
+
+      // Optionally clear form
+      temperatureController.clear();
+      symptomsController.clear();
+      exposureController.clear();
+      vaccinationController.clear();
+      setState(() {
+        hasSymptoms = false;
+        hasExposure = false;
+      });
+    } catch (e) {
+      scaffold.showSnackBar(SnackBar(
+        content: TextWidget(
+            text: 'Failed to submit: $e', fontSize: 14, color: white),
+        backgroundColor: Colors.red,
+      ));
+    } finally {
+      if (mounted) setState(() => _submitting = false);
+    }
   }
 
   Widget _buildSectionHeader(String title) {
@@ -62,32 +184,6 @@ class _HealthSurveillanceScreenState extends State<HealthSurveillanceScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: children,
-      ),
-    );
-  }
-
-  Widget _buildResultItem(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          TextWidget(
-            text: '$label: ',
-            fontSize: 14,
-            color: black,
-            fontFamily: 'Medium',
-          ),
-          Expanded(
-            child: TextWidget(
-              text: value,
-              fontSize: 14,
-              color: grey,
-              fontFamily: 'Regular',
-              align: TextAlign.left,
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -254,52 +350,16 @@ class _HealthSurveillanceScreenState extends State<HealthSurveillanceScreen> {
                     hasValidator: false,
                     maxLine: 2,
                   ),
-                  const SizedBox(height: 6),
-                  ButtonWidget(
-                    label: 'Upload Vaccination Record',
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: TextWidget(
-                            text: 'File upload placeholder',
-                            fontSize: 14,
-                            color: white,
-                          ),
-                          backgroundColor: primary,
-                          duration: const Duration(seconds: 2),
-                        ),
-                      );
-                    },
-                    color: secondary,
-                    textColor: black,
-                    width: double.infinity,
-                    height: 50,
-                    radius: 8,
-                    fontSize: 14,
-                  ),
                 ]),
                 // Submit Button
                 const SizedBox(height: 12),
                 ButtonWidget(
                   label: 'Submit Health Declaration',
                   onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      setState(() {
-                        isSubmitted = true;
-                      });
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: TextWidget(
-                            text: 'Health declaration submitted',
-                            fontSize: 14,
-                            color: white,
-                          ),
-                          backgroundColor: primary,
-                          duration: const Duration(seconds: 2),
-                        ),
-                      );
-                    }
+                    if (_submitting) return;
+                    _submit();
                   },
+                  isLoading: _submitting,
                   color: primary,
                   textColor: white,
                   width: double.infinity,
@@ -307,45 +367,6 @@ class _HealthSurveillanceScreenState extends State<HealthSurveillanceScreen> {
                   radius: 8,
                   fontSize: 16,
                 ),
-                // Results Section
-                if (isSubmitted) ...[
-                  const SizedBox(height: 12),
-                  _buildSectionHeader('Health Declaration Results'),
-                  _buildSection([
-                    _buildResultItem(
-                        'Body Temperature', '${temperatureController.text} °C'),
-                    _buildResultItem(
-                        'Symptoms',
-                        hasSymptoms
-                            ? symptomsController.text.isEmpty
-                                ? 'None reported'
-                                : symptomsController.text
-                            : 'None'),
-                    _buildResultItem(
-                        'Exposure',
-                        hasExposure
-                            ? exposureController.text.isEmpty
-                                ? 'None reported'
-                                : exposureController.text
-                            : 'None'),
-                    _buildResultItem(
-                        'Vaccination Status',
-                        vaccinationController.text.isEmpty
-                            ? 'Not provided'
-                            : vaccinationController.text),
-                    const SizedBox(height: 8),
-                    TextWidget(
-                      text:
-                          'AI Assessment: ${hasSymptoms || hasExposure ? 'Further Review Needed' : 'Low Risk'}',
-                      fontSize: 14,
-                      color: hasSymptoms || hasExposure
-                          ? Colors.red
-                          : Colors.green,
-                      fontFamily: 'Bold',
-                      align: TextAlign.left,
-                    ),
-                  ]),
-                ],
                 const SizedBox(height: 12),
               ],
             ),

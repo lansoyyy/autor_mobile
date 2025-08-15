@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:async';
 import 'package:autour_mobile/utils/colors.dart';
 import 'package:autour_mobile/widgets/text_widget.dart';
 import 'package:autour_mobile/widgets/button_widget.dart';
@@ -24,117 +26,62 @@ class _CommonDialectsScreenState extends State<CommonDialectsScreen> {
     'San Luis',
   ];
 
-  final List<Map<String, String>> dialectEntries = [
-    {
-      'phrase': 'Kumusta',
-      'meaning': 'Hello',
-      'pronunciation': 'Koo-moos-ta',
-      'town': 'Baler',
-      'language': 'Tagalog',
-    },
-    {
-      'phrase': 'Agyamanak',
-      'meaning': 'Thank you',
-      'pronunciation': 'Ag-ya-ma-nak',
-      'town': 'Maria Aurora',
-      'language': 'Ilocano',
-    },
-    {
-      'phrase': 'Magandang Umaga',
-      'meaning': 'Good Morning',
-      'pronunciation': 'Ma-gan-dang Oo-ma-ga',
-      'town': 'Dingalan',
-      'language': 'Tagalog',
-    },
-    {
-      'phrase': 'Naimbag nga Bigat',
-      'meaning': 'Good Morning',
-      'pronunciation': 'Nai-im-bag nga Bi-gat',
-      'town': 'San Luis',
-      'language': 'Ilocano',
-    },
-    {
-      'phrase': 'Salamat',
-      'meaning': 'Thank you',
-      'pronunciation': 'Sa-la-mat',
-      'town': 'Baler',
-      'language': 'Tagalog',
-    },
-    {
-      'phrase': 'Mabuhay',
-      'meaning': 'Welcome',
-      'pronunciation': 'Ma-boo-hai',
-      'town': 'Dingalan',
-      'language': 'Tagalog',
-    },
-    {
-      'phrase': 'Magandang Hapon',
-      'meaning': 'Good Afternoon',
-      'pronunciation': 'Ma-gan-dang Ha-pon',
-      'town': 'Maria Aurora',
-      'language': 'Tagalog',
-    },
-    {
-      'phrase': 'Naimbag nga Malem',
-      'meaning': 'Good Afternoon',
-      'pronunciation': 'Nai-im-bag nga Ma-lem',
-      'town': 'San Luis',
-      'language': 'Ilocano',
-    },
-    {
-      'phrase': 'Paalam',
-      'meaning': 'Goodbye',
-      'pronunciation': 'Pa-a-lam',
-      'town': 'Baler',
-      'language': 'Tagalog',
-    },
-    {
-      'phrase': 'Agsardeng',
-      'meaning': 'Goodbye',
-      'pronunciation': 'Ag-sar-deng',
-      'town': 'Maria Aurora',
-      'language': 'Ilocano',
-    },
-    {
-      'phrase': 'Kumusta ka?',
-      'meaning': 'How are you?',
-      'pronunciation': 'Koo-moos-ta ka',
-      'town': 'Dingalan',
-      'language': 'Tagalog',
-    },
-    {
-      'phrase': 'Kumusta ka ngayon?',
-      'meaning': 'How are you today?',
-      'pronunciation': 'Koo-moos-ta ka nga-yon',
-      'town': 'San Luis',
-      'language': 'Tagalog',
-    },
-    {
-      'phrase': 'Ania ti balita?',
-      'meaning': 'How are you?',
-      'pronunciation': 'A-ni-a ti ba-li-ta',
-      'town': 'Maria Aurora',
-      'language': 'Ilocano',
-    },
-  ];
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
+  late final CollectionReference dialectsRef =
+      _db.collection('common_dialects');
+  StreamSubscription? _sub;
+  bool _loading = true;
 
-  List<Map<String, String>> get filteredDialects {
+  List<Map<String, dynamic>> dialectEntries = [];
+
+  List<Map<String, dynamic>> get filteredDialects {
     return dialectEntries.where((entry) {
-      final matchesTown =
-          selectedTown == 'All' || entry['town'] == selectedTown;
-      final matchesSearch = entry['phrase']!
+      final town = (entry['town'] ?? '').toString();
+      final q = searchQuery.toLowerCase();
+      final matchesTown = selectedTown == 'All' || town == selectedTown;
+      final matchesSearch = (entry['phrase'] ?? '')
+              .toString()
               .toLowerCase()
-              .contains(searchQuery.toLowerCase()) ||
-          entry['meaning']!.toLowerCase().contains(searchQuery.toLowerCase()) ||
-          entry['pronunciation']!
-              .toLowerCase()
-              .contains(searchQuery.toLowerCase());
+              .contains(q) ||
+          (entry['meaning'] ?? '').toString().toLowerCase().contains(q) ||
+          (entry['pronunciation'] ?? '').toString().toLowerCase().contains(q) ||
+          (entry['usage'] ?? '').toString().toLowerCase().contains(q) ||
+          (entry['example'] ?? '').toString().toLowerCase().contains(q);
       return matchesTown && matchesSearch;
     }).toList();
   }
 
   @override
+  void initState() {
+    super.initState();
+    _sub = dialectsRef
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .listen((s) {
+      setState(() {
+        dialectEntries = s.docs.map((d) {
+          final data = d.data() as Map<String, dynamic>;
+          return {
+            'phrase': (data['phrase'] ?? '').toString(),
+            'meaning': (data['meaning'] ?? '').toString(),
+            'pronunciation': (data['pronunciation'] ?? '').toString(),
+            'town': (data['town'] ?? '').toString(),
+            'language': (data['language'] ?? '').toString(),
+            'usage': (data['usage'] ?? '').toString(),
+            'example': (data['example'] ?? '').toString(),
+            'verified': (data['verified'] ?? false) == true,
+          };
+        }).toList();
+        _loading = false;
+      });
+    }, onError: (_) {
+      setState(() => _loading = false);
+    });
+  }
+
+  @override
   void dispose() {
+    _sub?.cancel();
     searchController.dispose();
     super.dispose();
   }
@@ -174,7 +121,7 @@ class _CommonDialectsScreenState extends State<CommonDialectsScreen> {
     );
   }
 
-  Widget _buildDialectCard(Map<String, String> entry) {
+  Widget _buildDialectCard(Map<String, dynamic> entry) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
@@ -186,37 +133,70 @@ class _CommonDialectsScreenState extends State<CommonDialectsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          TextWidget(
-            text: entry['phrase']!,
-            fontSize: 16,
-            color: black,
-            fontFamily: 'Bold',
+          Row(
+            children: [
+              Expanded(
+                child: TextWidget(
+                  text: (entry['phrase'] ?? '').toString(),
+                  fontSize: 16,
+                  color: black,
+                  fontFamily: 'Bold',
+                ),
+              ),
+              if (entry['verified'] == true)
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Colors.green.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: const Text(
+                    'Verified',
+                    style: TextStyle(color: Colors.green, fontSize: 10),
+                  ),
+                ),
+            ],
           ),
           const SizedBox(height: 4),
           TextWidget(
-            text: 'Meaning: ${entry['meaning']}',
+            text: 'Meaning: ${(entry['meaning'] ?? '').toString()}',
             fontSize: 14,
             color: grey,
             fontFamily: 'Regular',
           ),
           TextWidget(
-            text: 'Pronunciation: ${entry['pronunciation']}',
+            text: 'Pronunciation: ${(entry['pronunciation'] ?? '').toString()}',
             fontSize: 14,
             color: grey,
             fontFamily: 'Regular',
           ),
           TextWidget(
-            text: 'Town: ${entry['town']}',
+            text: 'Town: ${(entry['town'] ?? '').toString()}',
             fontSize: 14,
             color: grey,
             fontFamily: 'Regular',
           ),
           TextWidget(
-            text: 'Language: ${entry['language']}',
+            text: 'Language: ${(entry['language'] ?? '').toString()}',
             fontSize: 14,
             color: grey,
             fontFamily: 'Regular',
           ),
+          if ((entry['usage'] ?? '').toString().isNotEmpty)
+            TextWidget(
+              text: 'Usage: ${(entry['usage'] ?? '').toString()}',
+              fontSize: 14,
+              color: grey,
+              fontFamily: 'Regular',
+            ),
+          if ((entry['example'] ?? '').toString().isNotEmpty)
+            TextWidget(
+              text: 'Example: ${(entry['example'] ?? '').toString()}',
+              fontSize: 14,
+              color: grey,
+              fontFamily: 'Regular',
+            ),
         ],
       ),
     );
@@ -275,11 +255,11 @@ class _CommonDialectsScreenState extends State<CommonDialectsScreen> {
                 radius: 8,
                 hasValidator: false,
                 inputType: TextInputType.text,
-                // onChanged: (value) {
-                //   setState(() {
-                //     searchQuery = value;
-                //   });
-                // },
+                onChanged: (value) {
+                  setState(() {
+                    searchQuery = value;
+                  });
+                },
                 prefix: const Icon(Icons.search, color: grey),
               ),
               const SizedBox(height: 12),
@@ -325,9 +305,26 @@ class _CommonDialectsScreenState extends State<CommonDialectsScreen> {
               // Verified Dialect Entries
               _buildSectionHeader('Common Greetings'),
               _buildSection([
-                ...filteredDialects
-                    .map((entry) => _buildDialectCard(entry))
-                    .toList(),
+                if (_loading)
+                  const Center(
+                      child: Padding(
+                    padding: EdgeInsets.all(12.0),
+                    child: CircularProgressIndicator(),
+                  ))
+                else if (filteredDialects.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: TextWidget(
+                      text: 'No entries found',
+                      fontSize: 14,
+                      color: grey,
+                      fontFamily: 'Regular',
+                    ),
+                  )
+                else
+                  ...filteredDialects
+                      .map((entry) => _buildDialectCard(entry))
+                      .toList(),
                 const SizedBox(height: 6),
                 ButtonWidget(
                   label: 'View More Entries',
@@ -390,7 +387,7 @@ class _CommonDialectsScreenState extends State<CommonDialectsScreen> {
 }
 
 class FullDialectDatabaseScreen extends StatefulWidget {
-  final List<Map<String, String>> dialectEntries;
+  final List<Map<String, dynamic>> dialectEntries;
 
   const FullDialectDatabaseScreen({super.key, required this.dialectEntries});
 
@@ -412,17 +409,19 @@ class _FullDialectDatabaseScreenState extends State<FullDialectDatabaseScreen> {
     'San Luis',
   ];
 
-  List<Map<String, String>> get filteredDialects {
+  List<Map<String, dynamic>> get filteredDialects {
     return widget.dialectEntries.where((entry) {
-      final matchesTown =
-          selectedTown == 'All' || entry['town'] == selectedTown;
-      final matchesSearch = entry['phrase']!
+      final town = (entry['town'] ?? '').toString();
+      final q = searchQuery.toLowerCase();
+      final matchesTown = selectedTown == 'All' || town == selectedTown;
+      final matchesSearch = (entry['phrase'] ?? '')
+              .toString()
               .toLowerCase()
-              .contains(searchQuery.toLowerCase()) ||
-          entry['meaning']!.toLowerCase().contains(searchQuery.toLowerCase()) ||
-          entry['pronunciation']!
-              .toLowerCase()
-              .contains(searchQuery.toLowerCase());
+              .contains(q) ||
+          (entry['meaning'] ?? '').toString().toLowerCase().contains(q) ||
+          (entry['pronunciation'] ?? '').toString().toLowerCase().contains(q) ||
+          (entry['usage'] ?? '').toString().toLowerCase().contains(q) ||
+          (entry['example'] ?? '').toString().toLowerCase().contains(q);
       return matchesTown && matchesSearch;
     }).toList();
   }
@@ -468,7 +467,7 @@ class _FullDialectDatabaseScreenState extends State<FullDialectDatabaseScreen> {
     );
   }
 
-  Widget _buildDialectCard(Map<String, String> entry) {
+  Widget _buildDialectCard(Map<String, dynamic> entry) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
@@ -480,37 +479,70 @@ class _FullDialectDatabaseScreenState extends State<FullDialectDatabaseScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          TextWidget(
-            text: entry['phrase']!,
-            fontSize: 16,
-            color: black,
-            fontFamily: 'Bold',
+          Row(
+            children: [
+              Expanded(
+                child: TextWidget(
+                  text: (entry['phrase'] ?? '').toString(),
+                  fontSize: 16,
+                  color: black,
+                  fontFamily: 'Bold',
+                ),
+              ),
+              if (entry['verified'] == true)
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Colors.green.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: const Text(
+                    'Verified',
+                    style: TextStyle(color: Colors.green, fontSize: 10),
+                  ),
+                ),
+            ],
           ),
           const SizedBox(height: 4),
           TextWidget(
-            text: 'Meaning: ${entry['meaning']}',
+            text: 'Meaning: ${(entry['meaning'] ?? '').toString()}',
             fontSize: 14,
             color: grey,
             fontFamily: 'Regular',
           ),
           TextWidget(
-            text: 'Pronunciation: ${entry['pronunciation']}',
+            text: 'Pronunciation: ${(entry['pronunciation'] ?? '').toString()}',
             fontSize: 14,
             color: grey,
             fontFamily: 'Regular',
           ),
           TextWidget(
-            text: 'Town: ${entry['town']}',
+            text: 'Town: ${(entry['town'] ?? '').toString()}',
             fontSize: 14,
             color: grey,
             fontFamily: 'Regular',
           ),
           TextWidget(
-            text: 'Language: ${entry['language']}',
+            text: 'Language: ${(entry['language'] ?? '').toString()}',
             fontSize: 14,
             color: grey,
             fontFamily: 'Regular',
           ),
+          if ((entry['usage'] ?? '').toString().isNotEmpty)
+            TextWidget(
+              text: 'Usage: ${(entry['usage'] ?? '').toString()}',
+              fontSize: 14,
+              color: grey,
+              fontFamily: 'Regular',
+            ),
+          if ((entry['example'] ?? '').toString().isNotEmpty)
+            TextWidget(
+              text: 'Example: ${(entry['example'] ?? '').toString()}',
+              fontSize: 14,
+              color: grey,
+              fontFamily: 'Regular',
+            ),
         ],
       ),
     );
@@ -569,11 +601,11 @@ class _FullDialectDatabaseScreenState extends State<FullDialectDatabaseScreen> {
                 radius: 8,
                 hasValidator: false,
                 inputType: TextInputType.text,
-                // onChanged: (value) {
-                //   setState(() {
-                //     searchQuery = value;
-                //   });
-                // },
+                onChanged: (value) {
+                  setState(() {
+                    searchQuery = value;
+                  });
+                },
                 prefix: const Icon(Icons.search, color: grey),
               ),
               const SizedBox(height: 12),

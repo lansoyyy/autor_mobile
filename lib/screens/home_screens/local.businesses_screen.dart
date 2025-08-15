@@ -3,6 +3,8 @@ import 'package:autour_mobile/utils/colors.dart';
 import 'package:autour_mobile/widgets/text_widget.dart';
 import 'package:autour_mobile/widgets/button_widget.dart';
 import 'package:autour_mobile/widgets/textfield_widget.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class LocalBusinessesScreen extends StatefulWidget {
   const LocalBusinessesScreen({super.key});
@@ -26,206 +28,29 @@ class _LocalBusinessesScreenState extends State<LocalBusinessesScreen> {
     'Tours',
   ];
 
-  final List<Map<String, dynamic>> businesses = [
-    {
-      'name': 'Baler Beach Resort',
-      'category': 'Accommodations',
-      'location': 'Baler, Aurora',
-      'description': 'Cozy beachfront resort with accessible rooms.',
-      'phone': '09751000896',
-      'email': 'baler.eco@gmail.com.ph',
-      'hours': '8:00AM - 5:00PM',
-      'rooms_available': 12,
-      'total_rooms': 25,
-      'room_types': ['Standard', 'Deluxe', 'Suite'],
-      'price_range': '₱2,500 - ₱8,000',
-    },
-    {
-      'name': 'Aurora Eats',
-      'category': 'Restaurants',
-      'location': 'Maria Aurora, Aurora',
-      'description': 'Local cuisine with vegan options.',
-      'phone': '09751000896',
-      'email': 'baler.eco@gmail.com.ph',
-      'hours': '8:00AM - 5:00PM'
-    },
-    {
-      'name': 'Baler Public Market',
-      'category': 'Markets',
-      'location': 'Baler, Aurora',
-      'description': 'Fresh local produce and goods at affordable prices.',
-      'phone': '09751000896',
-      'email': 'baler.eco@gmail.com.ph',
-      'hours': '6:00AM - 6:00PM',
-      'prices': {
-        'Vegetables': {
-          'Tomatoes': '₱80/kg',
-          'Onions': '₱60/kg',
-          'Garlic': '₱120/kg',
-          'Potatoes': '₱70/kg',
-          'Carrots': '₱90/kg',
-          'Cabbage': '₱50/kg',
-        },
-        'Fruits': {
-          'Bananas': '₱40/kg',
-          'Mangoes': '₱120/kg',
-          'Pineapples': '₱80/piece',
-          'Oranges': '₱100/kg',
-          'Apples': '₱150/kg',
-        },
-        'Meat & Fish': {
-          'Pork': '₱280/kg',
-          'Chicken': '₱180/kg',
-          'Fish (Tuna)': '₱200/kg',
-          'Shrimp': '₱350/kg',
-        },
-        'Grains': {
-          'Rice': '₱45/kg',
-          'Corn': '₱25/kg',
-        }
-      }
-    },
-    {
-      'name': 'Maria Aurora Market',
-      'category': 'Markets',
-      'location': 'Maria Aurora, Aurora',
-      'description': 'Local market with fresh produce and household items.',
-      'phone': '09751000896',
-      'email': 'baler.eco@gmail.com.ph',
-      'hours': '5:00AM - 7:00PM',
-      'prices': {
-        'Vegetables': {
-          'Tomatoes': '₱75/kg',
-          'Onions': '₱55/kg',
-          'Garlic': '₱110/kg',
-          'Potatoes': '₱65/kg',
-          'Carrots': '₱85/kg',
-          'Cabbage': '₱45/kg',
-        },
-        'Fruits': {
-          'Bananas': '₱35/kg',
-          'Mangoes': '₱110/kg',
-          'Pineapples': '₱75/piece',
-          'Oranges': '₱90/kg',
-          'Apples': '₱140/kg',
-        },
-        'Meat & Fish': {
-          'Pork': '₱270/kg',
-          'Chicken': '₱170/kg',
-          'Fish (Tuna)': '₱190/kg',
-          'Shrimp': '₱330/kg',
-        },
-        'Grains': {
-          'Rice': '₱42/kg',
-          'Corn': '₱22/kg',
-        }
-      }
-    },
-    {
-      'name': 'Baler Bus Terminal',
-      'category': 'Transportation',
-      'location': 'Baler, Aurora',
-      'description': 'Convenient bus services to Aurora.',
-      'phone': '09751000896',
-      'email': 'baler.eco@gmail.com.ph',
-      'hours': '8:00AM - 5:00PM'
-    },
-    {
-      'name': 'Baler Tricycle Services',
-      'category': 'Transportation',
-      'location': 'Baler, Aurora',
-      'description': 'Reliable tricycle transportation around Baler.',
-      'phone': '09751000896',
-      'email': 'baler.eco@gmail.com.ph',
-      'hours': '6:00AM - 10:00PM',
-      'fares': {
-        'Short Distance (1-2 km)': '₱15',
-        'Medium Distance (2-5 km)': '₱25',
-        'Long Distance (5-10 km)': '₱40',
-        'Airport Transfer': '₱100',
-        'Beach Transfer': '₱30',
-        'Market Transfer': '₱20',
-        'Night Fare (10PM-6AM)': '+₱10',
-        'Additional Passenger': '+₱5',
-      }
-    },
-    {
-      'name': 'San Luis Tricycle Services',
-      'category': 'Transportation',
-      'location': 'San Luis, Aurora',
-      'description': 'Tricycle services in San Luis area.',
-      'phone': '09751000896',
-      'email': 'baler.eco@gmail.com.ph',
-      'hours': '6:00AM - 9:00PM',
-      'fares': {
-        'Short Distance (1-2 km)': '₱12',
-        'Medium Distance (2-5 km)': '₱20',
-        'Long Distance (5-10 km)': '₱35',
-        'Town Center Transfer': '₱15',
-        'Night Fare (9PM-6AM)': '+₱8',
-        'Additional Passenger': '+₱3',
-      }
-    },
-    {
-      'name': 'Eco Tours Aurora',
-      'category': 'Tours',
-      'location': 'Dingalan, Aurora',
-      'description': 'Guided eco-friendly tours to waterfalls.',
-      'phone': '09751000896',
-      'email': 'baler.eco@gmail.com.ph',
-      'hours': '8:00AM - 5:00PM'
-    },
-    {
-      'name': 'Quick Fix Vulcanizing',
-      'category': 'Services',
-      'location': 'San Luis, Aurora',
-      'description': 'Reliable tire repair services.',
-      'phone': '09751000896',
-      'email': 'baler.eco@gmail.com.ph',
-      'hours': '8:00AM - 5:00PM'
-    },
-    {
-      'name': 'Aurora Mountain Lodge',
-      'category': 'Accommodations',
-      'location': 'San Luis, Aurora',
-      'description': 'Scenic mountain lodge with panoramic views.',
-      'phone': '09751000897',
-      'email': 'aurora.lodge@gmail.com.ph',
-      'hours': '24/7',
-      'rooms_available': 5,
-      'total_rooms': 15,
-      'room_types': ['Cabin', 'Deluxe Cabin', 'Family Suite'],
-      'price_range': '₱3,500 - ₱12,000',
-    },
-    {
-      'name': 'Baler Bay Hotel',
-      'category': 'Accommodations',
-      'location': 'Baler, Aurora',
-      'description': 'Modern hotel with beach access and amenities.',
-      'phone': '09751000898',
-      'email': 'baler.bay@gmail.com.ph',
-      'hours': '24/7',
-      'rooms_available': 0,
-      'total_rooms': 40,
-      'room_types': ['Standard', 'Deluxe', 'Executive Suite'],
-      'price_range': '₱4,000 - ₱15,000',
-    },
-  ];
+  // Map admin Firestore fields (camelCase) to this screen's expected snake_case keys
+  Map<String, dynamic> _mapBusiness(Map<String, dynamic> data) {
+    final List<String>? roomTypes = (data['roomTypes'] is List)
+        ? List<String>.from(data['roomTypes'] as List)
+        : null;
 
-  List<Map<String, dynamic>> get filteredBusinesses {
-    return businesses.where((business) {
-      final matchesCategory =
-          selectedCategory == 'All' || business['category'] == selectedCategory;
-      final matchesSearch =
-          business['name']!.toLowerCase().contains(searchQuery.toLowerCase()) ||
-              business['description']!
-                  .toLowerCase()
-                  .contains(searchQuery.toLowerCase()) ||
-              business['location']!
-                  .toLowerCase()
-                  .contains(searchQuery.toLowerCase());
-      return matchesCategory && matchesSearch;
-    }).toList();
+    return {
+      'name': (data['name'] ?? '').toString(),
+      'category': (data['category'] ?? '').toString(),
+      'location': (data['location'] ?? '').toString(),
+      'description': (data['description'] ?? '').toString(),
+      'phone': (data['phone'] ?? '').toString(),
+      'email': (data['email'] ?? '').toString(),
+      'hours': (data['hours'] ?? '').toString(),
+      'rooms_available': data['roomsAvailable'],
+      'total_rooms': data['totalRooms'],
+      'room_types': roomTypes,
+      'price_range': data['priceRange'],
+      'prices': data['prices'],
+      'fares': data['fares'],
+      // Use the provided static image URL for now
+      'image': 'https://live.staticflickr.com/506/19664562909_4ddd66e89f_b.jpg',
+    };
   }
 
   @override
@@ -322,29 +147,82 @@ class _LocalBusinessesScreenState extends State<LocalBusinessesScreen> {
               ),
             ),
           ),
-          // Business List
+          // Business List (from Firestore)
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              itemCount: filteredBusinesses.length,
-              itemBuilder: (context, index) {
-                final business = filteredBusinesses[index];
-                return _buildBusinessCard(
-                  context,
-                  business: business,
-                  name: business['name']!,
-                  category: business['category']!,
-                  location: business['location']!,
-                  description: business['description']!,
-                  imageUrl:
-                      'https://live.staticflickr.com/506/19664562909_4ddd66e89f_b.jpg',
-                  onTap: () {
-                    Navigator.push(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('businesses')
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  return Center(
+                    child: TextWidget(
+                      text: 'Failed to load businesses',
+                      fontSize: 14,
+                      color: grey,
+                      fontFamily: 'Regular',
+                    ),
+                  );
+                }
+
+                final docs = snapshot.data?.docs ?? [];
+                final List<Map<String, dynamic>> allBusinesses = docs
+                    .map((d) => _mapBusiness(d.data() as Map<String, dynamic>))
+                    .toList();
+
+                final filtered = allBusinesses.where((business) {
+                  final matchesCategory = selectedCategory == 'All' ||
+                      business['category'] == selectedCategory;
+                  final q = searchQuery.toLowerCase();
+                  final name =
+                      (business['name'] ?? '').toString().toLowerCase();
+                  final desc =
+                      (business['description'] ?? '').toString().toLowerCase();
+                  final loc =
+                      (business['location'] ?? '').toString().toLowerCase();
+                  final matchesSearch =
+                      name.contains(q) || desc.contains(q) || loc.contains(q);
+                  return matchesCategory && matchesSearch;
+                }).toList();
+
+                if (filtered.isEmpty) {
+                  return Center(
+                    child: TextWidget(
+                      text: 'No businesses found',
+                      fontSize: 14,
+                      color: grey,
+                      fontFamily: 'Regular',
+                    ),
+                  );
+                }
+
+                return ListView.builder(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  itemCount: filtered.length,
+                  itemBuilder: (context, index) {
+                    final business = filtered[index];
+                    return _buildBusinessCard(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            BusinessDetailScreen(business: business),
-                      ),
+                      business: business,
+                      name: business['name'] ?? '',
+                      category: business['category'] ?? '',
+                      location: business['location'] ?? '',
+                      description: business['description'] ?? '',
+                      imageUrl:
+                          'https://live.staticflickr.com/506/19664562909_4ddd66e89f_b.jpg',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                BusinessDetailScreen(business: business),
+                          ),
+                        );
+                      },
                     );
                   },
                 );
@@ -691,19 +569,7 @@ class BusinessDetailScreen extends StatelessWidget {
               // Contact Button
               ButtonWidget(
                 label: 'Contact Business',
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: TextWidget(
-                        text: 'Contacting ${business['name']}...',
-                        fontSize: 14,
-                        color: white,
-                      ),
-                      backgroundColor: primary,
-                      duration: const Duration(seconds: 2),
-                    ),
-                  );
-                },
+                onPressed: () { _launchPhoneCall(context); },
                 color: primary,
                 textColor: white,
                 width: double.infinity,
@@ -718,6 +584,58 @@ class BusinessDetailScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  // Launch phone dialer for the business phone number
+  Future<void> _launchPhoneCall(BuildContext context) async {
+    final String phone = (business['phone'] ?? '').toString().trim();
+    if (phone.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: TextWidget(
+            text: 'No phone number available',
+            fontSize: 14,
+            color: white,
+          ),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    final Uri uri = Uri(scheme: 'tel', path: phone);
+    try {
+      final bool launched = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+      if (!launched) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: TextWidget(
+              text: 'Could not open the dialer',
+              fontSize: 14,
+              color: white,
+            ),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (_) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: TextWidget(
+            text: 'Failed to launch dialer',
+            fontSize: 14,
+            color: white,
+          ),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   // Helper method to create icon-label-value rows

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:autour_mobile/utils/colors.dart';
 import 'package:autour_mobile/widgets/text_widget.dart';
 import 'package:autour_mobile/widgets/button_widget.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CommunityScreen extends StatefulWidget {
   const CommunityScreen({super.key});
@@ -246,7 +247,42 @@ class _CommunityScreenState extends State<CommunityScreen> {
             fontFamily: 'Bold',
           ),
           const SizedBox(height: 8),
-          ...stories.map((story) => _buildStoryCard(context, story)).toList(),
+          // Voices of Aurora: community_stories
+          StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('community_stories')
+                .orderBy('createdAt', descending: true)
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasError) {
+                return _buildErrorText('Failed to load stories');
+              }
+              final docs = snapshot.data?.docs ?? [];
+              if (docs.isEmpty) {
+                // Fallback to bundled sample content
+                return Column(
+                  children:
+                      stories.map((s) => _buildStoryCard(context, s)).toList(),
+                );
+              }
+              final items = docs.map((d) {
+                final data = d.data() as Map<String, dynamic>;
+                return {
+                  'title': (data['title'] ?? '').toString(),
+                  'author': (data['author'] ?? '').toString(),
+                  'content': (data['content'] ?? '').toString(),
+                  'image': (data['image'] ?? '').toString(),
+                };
+              }).toList();
+              return Column(
+                children:
+                    items.map((s) => _buildStoryCard(context, s)).toList(),
+              );
+            },
+          ),
           const SizedBox(height: 24),
           TextWidget(
             text: 'Heritage Education',
@@ -255,7 +291,40 @@ class _CommunityScreenState extends State<CommunityScreen> {
             fontFamily: 'Bold',
           ),
           const SizedBox(height: 12),
-          ...heritageItems.map((item) => _buildHeritageCard(item)).toList(),
+          // Heritage: community_heritage
+          StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('community_heritage')
+                .orderBy('createdAt', descending: true)
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasError) {
+                return _buildErrorText('Failed to load heritage');
+              }
+              final docs = snapshot.data?.docs ?? [];
+              if (docs.isEmpty) {
+                return Column(
+                  children: heritageItems
+                      .map((item) => _buildHeritageCard(item))
+                      .toList(),
+                );
+              }
+              final items = docs.map((d) {
+                final data = d.data() as Map<String, dynamic>;
+                return {
+                  'title': (data['title'] ?? '').toString(),
+                  'description': (data['description'] ?? '').toString(),
+                };
+              }).toList();
+              return Column(
+                children:
+                    items.map((item) => _buildHeritageCard(item)).toList(),
+              );
+            },
+          ),
           const SizedBox(height: 24),
           TextWidget(
             text: 'Rules & Regulations',
@@ -264,7 +333,41 @@ class _CommunityScreenState extends State<CommunityScreen> {
             fontFamily: 'Bold',
           ),
           const SizedBox(height: 12),
-          ...rulesAndRegulations.map((rule) => _buildRulesCard(rule)).toList(),
+          // Rules: community_rules
+          StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('community_rules')
+                .orderBy('createdAt', descending: true)
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasError) {
+                return _buildErrorText('Failed to load rules');
+              }
+              final docs = snapshot.data?.docs ?? [];
+              if (docs.isEmpty) {
+                return Column(
+                  children: rulesAndRegulations
+                      .map((rule) => _buildRulesCard(rule))
+                      .toList(),
+                );
+              }
+              final items = docs.map((d) {
+                final data = d.data() as Map<String, dynamic>;
+                final raw = (data['items'] as List?) ?? const [];
+                final list = raw.map((e) => e.toString()).toList();
+                return {
+                  'title': (data['title'] ?? '').toString(),
+                  'items': list,
+                };
+              }).toList();
+              return Column(
+                children: items.map((rule) => _buildRulesCard(rule)).toList(),
+              );
+            },
+          ),
           const SizedBox(height: 24),
           TextWidget(
             text: 'Sustainability Initiatives',
@@ -273,9 +376,44 @@ class _CommunityScreenState extends State<CommunityScreen> {
             fontFamily: 'Bold',
           ),
           const SizedBox(height: 12),
-          ...sustainabilityInfo
-              .map((info) => _buildSustainabilityCard(info))
-              .toList(),
+          // Sustainability: community_sustainability
+          StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('community_sustainability')
+                .orderBy('createdAt', descending: true)
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasError) {
+                return _buildErrorText('Failed to load sustainability');
+              }
+              final docs = snapshot.data?.docs ?? [];
+              if (docs.isEmpty) {
+                return Column(
+                  children: sustainabilityInfo
+                      .map((info) => _buildSustainabilityCard(info))
+                      .toList(),
+                );
+              }
+              final items = docs.map((d) {
+                final data = d.data() as Map<String, dynamic>;
+                final raw = (data['initiatives'] as List?) ?? const [];
+                final list = raw.map((e) => e.toString()).toList();
+                return {
+                  'title': (data['title'] ?? '').toString(),
+                  'description': (data['description'] ?? '').toString(),
+                  'initiatives': list,
+                };
+              }).toList();
+              return Column(
+                children: items
+                    .map((info) => _buildSustainabilityCard(info))
+                    .toList(),
+              );
+            },
+          ),
           const SizedBox(height: 24),
           TextWidget(
             text: 'Tourist Preservation Guidelines',
@@ -284,34 +422,45 @@ class _CommunityScreenState extends State<CommunityScreen> {
             fontFamily: 'Bold',
           ),
           const SizedBox(height: 12),
-          ...touristPreservation
-              .map((preservation) => _buildPreservationCard(preservation))
-              .toList(),
-          const SizedBox(height: 24),
-
-          // Safety Stories & Traditional Knowledge
-          TextWidget(
-            text: 'Safety Stories & Traditional Knowledge',
-            fontSize: 20,
-            color: black,
-            fontFamily: 'Bold',
+          // Preservation: community_preservation
+          StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('community_preservation')
+                .orderBy('createdAt', descending: true)
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasError) {
+                return _buildErrorText('Failed to load preservation');
+              }
+              final docs = snapshot.data?.docs ?? [];
+              if (docs.isEmpty) {
+                return Column(
+                  children: touristPreservation
+                      .map((p) => _buildPreservationCard(p))
+                      .toList(),
+                );
+              }
+              final items = docs.map((d) {
+                final data = d.data() as Map<String, dynamic>;
+                final raw = (data['practices'] as List?) ?? const [];
+                final list = raw.map((e) => e.toString()).toList();
+                return {
+                  'title': (data['title'] ?? '').toString(),
+                  'description': (data['description'] ?? '').toString(),
+                  'practices': list,
+                };
+              }).toList();
+              return Column(
+                children: items
+                    .map((preservation) => _buildPreservationCard(preservation))
+                    .toList(),
+              );
+            },
           ),
-          const SizedBox(height: 12),
-
-          // Contribute Safety Story Section
-          _buildContributeSafetyStoryCard(),
-
-          const SizedBox(height: 16),
-
-          // Local Safety Stories
-          _buildLocalSafetyStoriesCard(),
-
-          const SizedBox(height: 16),
-
-          // Dialect Alerts Section
-          _buildDialectAlertsCard(),
-
-          const SizedBox(height: 30),
+          const SizedBox(height: 24),
         ],
       ),
     );
@@ -753,9 +902,43 @@ class _CommunityScreenState extends State<CommunityScreen> {
             ],
           ),
           const SizedBox(height: 12),
-          ...safetyStories
-              .map((story) => _buildSafetyStoryItem(story))
-              .toList(),
+          StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('safety_stories')
+                .orderBy('createdAt', descending: true)
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasError) {
+                return _buildErrorText('Failed to load safety stories');
+              }
+              final docs = snapshot.data?.docs ?? [];
+              if (docs.isEmpty) {
+                return Column(
+                  children: safetyStories
+                      .map((story) => _buildSafetyStoryItem(story))
+                      .toList(),
+                );
+              }
+              final items = docs.map((d) {
+                final data = d.data() as Map<String, dynamic>;
+                return {
+                  'title': (data['title'] ?? '').toString(),
+                  'author': (data['author'] ?? '').toString(),
+                  'content': (data['content'] ?? '').toString(),
+                  'category': (data['category'] ?? '').toString(),
+                  'location': (data['location'] ?? '').toString(),
+                  'verified': (data['verified'] ?? false) == true,
+                };
+              }).toList();
+              return Column(
+                children:
+                    items.map((story) => _buildSafetyStoryItem(story)).toList(),
+              );
+            },
+          ),
         ],
       ),
     );
@@ -932,9 +1115,40 @@ class _CommunityScreenState extends State<CommunityScreen> {
             ],
           ),
           const SizedBox(height: 16),
-          ...dialectAlerts
-              .map((alert) => _buildDialectAlertItem(alert))
-              .toList(),
+          StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('dialect_alerts')
+                .orderBy('createdAt', descending: true)
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasError) {
+                return _buildErrorText('Failed to load dialect alerts');
+              }
+              final docs = snapshot.data?.docs ?? [];
+              if (docs.isEmpty) {
+                return Column(
+                  children: dialectAlerts
+                      .map((alert) => _buildDialectAlertItem(alert))
+                      .toList(),
+                );
+              }
+              final items = docs.map((d) {
+                final data = d.data() as Map<String, dynamic>;
+                return {
+                  'dialect': (data['dialect'] ?? '').toString(),
+                  'alert': (data['alert'] ?? '').toString(),
+                  'translation': (data['translation'] ?? '').toString(),
+                  'location': (data['location'] ?? '').toString(),
+                };
+              }).toList();
+              return Column(
+                children: items.map((a) => _buildDialectAlertItem(a)).toList(),
+              );
+            },
+          ),
           const SizedBox(height: 12),
           ButtonWidget(
             label: 'Enable Dialect Alerts',
@@ -1177,6 +1391,26 @@ class _CommunityScreenState extends State<CommunityScreen> {
           ],
         );
       },
+    );
+  }
+
+  Widget _buildErrorText(String message) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        children: [
+          const Icon(Icons.error_outline, color: Colors.red, size: 16),
+          const SizedBox(width: 6),
+          Expanded(
+            child: TextWidget(
+              text: message,
+              fontSize: 13,
+              color: Colors.red,
+              fontFamily: 'Regular',
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
