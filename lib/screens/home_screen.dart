@@ -342,41 +342,25 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
                         const SizedBox(height: 16),
 
-                        Row(
-                          children: [
-                            Expanded(
-                              child: ButtonWidget(
-                                label: 'View',
-                                onPressed: () {
-                                  _showAllRiskAlerts();
-                                },
-                                color: Colors.orange,
-                                textColor: white,
-                                height: 40,
-                                radius: 8,
-                                fontSize: 14,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            ButtonWidget(
-                              width: 250,
-                              label: 'Safety Guide',
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) =>
-                                        const SmartTourismGuideScreen(),
-                                  ),
-                                );
-                              },
-                              color: primary,
-                              textColor: white,
-                              height: 40,
-                              radius: 8,
-                              fontSize: 14,
-                            ),
-                          ],
+                        Center(
+                          child: ButtonWidget(
+                            width: 300,
+                            label: 'Safety Guide',
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      const SmartTourismGuideScreen(),
+                                ),
+                              );
+                            },
+                            color: primary,
+                            textColor: white,
+                            height: 40,
+                            radius: 8,
+                            fontSize: 14,
+                          ),
                         ),
                       ],
                     ),

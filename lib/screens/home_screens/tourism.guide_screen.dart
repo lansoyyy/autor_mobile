@@ -30,148 +30,205 @@ class _SmartTourismGuideScreenState extends State<SmartTourismGuideScreen>
 
   final List<Map<String, dynamic>> activities = [
     {
-      'name': 'Surfing',
+      'name': 'Surfing (Baler)',
       'icon': Icons.surfing,
       'color': Colors.blue,
-      'locations': ['Coastal zones', 'Surf spots'],
+      'locations': [
+        'Sabang Beach - Baler',
+        'Cemento Reef - Baler',
+        "Charlie\'s Point - Baler"
+      ],
       'risk_level': 'High',
       'alerts': [
-        'Rip current safety tips',
-        'Tsunami evacuation routes',
-        'Weather alert (e.g., storm surge)',
-        'First aid for jellyfish stings',
+        'Check swell, wind, and typhoon advisories before paddling out.',
+        'Beware of rip currents; if caught, swim parallel to shore to escape.',
+        'Wear leash and reef-safe footwear; sharp rocks/urchins present at Cemento.',
+        'Beginners should surf within designated zones at Sabang with instructors.',
       ],
       'active_alerts': [
         {
           'type': 'Weather',
-          'message': 'Strong currents detected at Baler Bay',
-          'severity': 'High',
+          'message': 'Strong onshore winds and rips reported at Sabang Beach',
+          'severity': 'Medium',
           'time': '2 hours ago',
         }
       ],
     },
     {
-      'name': 'Mountain Hiking',
-      'icon': Icons.terrain,
-      'color': Colors.green,
-      'locations': ['Mountain trails', 'Forested areas'],
-      'risk_level': 'Medium',
+      'name': 'Waterfall Trekking & Swimming (San Luis)',
+      'icon': Icons.water,
+      'color': Colors.lightBlue,
+      'locations': [
+        'Ditumabo (Mother) Falls - San Luis',
+        'Caunayan Falls - San Luis'
+      ],
+      'risk_level': 'High',
       'alerts': [
-        'Landslide risk alerts',
-        'Trail safety protocols',
-        'Emergency shelter locations',
-        'Snake bite first aid',
+        'Trails may close during heavy rain; follow LGU advisories.',
+        'Expect river crossings; wear closed-toe hiking shoes for grip.',
+        'Keep distance from plunge pool; sudden water surges can occur.',
+        'Hire accredited guides and follow checkpoint instructions.',
       ],
       'active_alerts': [
         {
           'type': 'Trail',
-          'message': 'Trail maintenance in progress - Use alternate route',
+          'message':
+              'Footbridge repair on Ditumabo trail — expect short detours',
           'severity': 'Medium',
           'time': '1 hour ago',
         }
       ],
     },
     {
-      'name': 'Trekking',
-      'icon': Icons.hiking,
-      'color': Colors.orange,
-      'locations': ['Eco-trails', 'River paths'],
-      'risk_level': 'Medium',
-      'alerts': [
-        'Flash flood warnings',
-        'Trail markers and safe zones',
-        'Wildlife encounter protocols',
-        'Emergency contact access',
-      ],
-      'active_alerts': [],
-    },
-    {
-      'name': 'Camping',
-      'icon': Icons.cabin,
-      'color': Colors.brown,
-      'locations': ['Designated campgrounds'],
-      'risk_level': 'Low',
-      'alerts': [
-        'Fire safety reminders',
-        'Weather-based alerts (e.g., thunderstorms)',
-        'Nearby rescue stations',
-      ],
-      'active_alerts': [
-        {
-          'type': 'Weather',
-          'message': 'Thunderstorm warning for tonight',
-          'severity': 'Medium',
-          'time': '30 minutes ago',
-        }
-      ],
-    },
-    {
-      'name': 'Biking',
-      'icon': Icons.pedal_bike,
-      'color': Colors.purple,
-      'locations': ['Adventure routes', 'Off-road paths'],
-      'risk_level': 'Medium',
-      'alerts': [
-        'Road hazard alerts',
-        'Heatstroke prevention tips',
-        'Nearest medical stations',
-      ],
-      'active_alerts': [],
-    },
-    {
-      'name': 'Boating/Kayaking',
-      'icon': Icons.directions_boat,
+      'name': 'Island Hopping & Tide Pools (Baler)',
+      'icon': Icons.waves,
       'color': Colors.cyan,
-      'locations': ['Rivers', 'Lakes', 'Coastal waters'],
-      'risk_level': 'High',
+      'locations': [
+        'Digisit Beach & Rock Formations - Baler',
+        'Aniao Islets - Baler'
+      ],
+      'risk_level': 'Medium',
       'alerts': [
-        'Capsizing protocols',
-        'Life vest reminders',
-        'Weather and tide updates',
+        'Check tide schedule; tide pools are safest during low tide.',
+        'Wear aqua shoes; sharp corals and rocks are common.',
+        'Avoid climbing slippery rock formations; strong waves can sweep you.',
+        'Boat rides only with accredited boatmen; always wear life vests.',
       ],
       'active_alerts': [
         {
           'type': 'Safety',
-          'message': 'High tide warning - Avoid coastal activities',
+          'message': 'Large swell near Aniao Islets — no crossing recommended',
           'severity': 'High',
           'time': '45 minutes ago',
         }
       ],
     },
     {
-      'name': 'Swimming',
-      'icon': Icons.pool,
-      'color': Colors.lightBlue,
-      'locations': ['Waterfalls', 'Rivers', 'Beaches'],
-      'risk_level': 'High',
+      'name': 'Viewpoint Hiking & Lighthouse Ridge (Dingalan)',
+      'icon': Icons.terrain,
+      'color': Colors.green,
+      'locations': [
+        'White Beach jump-off - Dingalan',
+        'Dingalan Lighthouse & Viewdeck'
+      ],
+      'risk_level': 'Medium',
       'alerts': [
-        'Flash flood and sudden water surge alerts',
-        'Slippery rock and drowning risks',
-        'Water quality warnings (e.g., contamination)',
-        'Nearest lifeguard or rescue station',
+        'Register at barangay/LGU; guide recommended for first-timers.',
+        'If boating to White Beach, check sea state with the Coast Guard.',
+        'Beware of strong winds at ridges; stay away from cliff edges.',
+        'Avoid hiking during thunderstorms or after heavy rain (landslide risk).',
       ],
       'active_alerts': [
         {
-          'type': 'Water Quality',
-          'message': 'Water quality alert at Mother Falls',
+          'type': 'Trail',
+          'message': 'Trail muddy and slippery — trekking shoes advised',
           'severity': 'Medium',
           'time': '1 hour ago',
         }
       ],
     },
     {
-      'name': 'Picnic',
-      'icon': Icons.table_bar,
-      'color': Colors.pink,
-      'locations': ['Waterfall zones', 'Riverside parks'],
+      'name': 'Sea Caving (Lamao Caves, Dingalan)',
+      'icon': Icons.explore,
+      'color': Colors.deepPurple,
+      'locations': ['Lamao Caves - Dingalan'],
+      'risk_level': 'Medium',
+      'alerts': [
+        'Go with accredited guides; bring helmet and headlamp.',
+        'Time your visit with the tide — some chambers flood at high tide.',
+        'Beware of falling rocks and surge; never enter during big swells.',
+        'Wear proper footwear; rocks are sharp and slippery.',
+      ],
+      'active_alerts': [
+        {
+          'type': 'Tide',
+          'message': 'High tide window this afternoon; cave entry limited',
+          'severity': 'Medium',
+          'time': '2 hours ago',
+        }
+      ],
+    },
+    {
+      'name': 'Beach Swimming & Snorkeling',
+      'icon': Icons.beach_access,
+      'color': Colors.teal,
+      'locations': [
+        'Dinadiawan Beach - Dipaculao',
+        'Casapsapan Beach - Casiguran'
+      ],
+      'risk_level': 'Medium',
+      'alerts': [
+        'Few areas have lifeguards; stay within waist-deep if unfamiliar.',
+        'Watch for rip currents; avoid river mouths and rocky headlands.',
+        'Possible jellyfish during hot months — use vinegar for stings.',
+        'Use reef-safe sunscreen; do not step on or touch corals.',
+      ],
+      'active_alerts': [
+        {
+          'type': 'Weather',
+          'message':
+              'Strong onshore winds at Dinadiawan — not advised for beginners',
+          'severity': 'Medium',
+          'time': '30 minutes ago',
+        }
+      ],
+    },
+    {
+      'name': 'Giant Balete Tree & Nature Parks',
+      'icon': Icons.park,
+      'color': Colors.brown,
+      'locations': [
+        'Millennium (Balete) Tree - Maria Aurora',
+        'Aurora Memorial National Park'
+      ],
       'risk_level': 'Low',
       'alerts': [
-        'Rockfall and landslide alerts',
-        'Fire safety (for cooking)',
-        'Waste disposal reminders',
-        'Emergency exit routes and shelter areas',
+        'Watch footing around exposed roots; surfaces can be slippery.',
+        'Use insect protection and stay on marked paths.',
+        'Respect site rules; no carving, picking, or littering.',
+        'Keep noise low to protect wildlife and other visitors\' experience.',
       ],
       'active_alerts': [],
+    },
+    {
+      'name': 'Heritage Walk (Baler Town)',
+      'icon': Icons.museum,
+      'color': Colors.orange,
+      'locations': [
+        'Museo de Baler',
+        'Ermita Hill',
+        'Baler Church (San Luis Obispo de Tolosa)'
+      ],
+      'risk_level': 'Low',
+      'alerts': [
+        'Hydrate and wear sun protection; mid-day heat can be extreme.',
+        'Secure valuables; expect crowds on weekends and holidays.',
+        'Follow heritage-site rules; avoid touching artifacts or displays.',
+        'Check opening hours and weather-related closures.',
+      ],
+      'active_alerts': [],
+    },
+    {
+      'name': 'Boating/Kayaking (Aurora Bays)',
+      'icon': Icons.directions_boat,
+      'color': Colors.cyan,
+      'locations': ['Baler Bay', 'Dingalan Bay', 'Casiguran Sound'],
+      'risk_level': 'High',
+      'alerts': [
+        'Life vests required at all times; follow boat crew instructions.',
+        'Check weather bulletins and tide/wave forecasts before departure.',
+        'Stay within safety markers; beware of rip and cross-currents.',
+        'Coordinate with the Coast Guard for permits/clearance when needed.',
+      ],
+      'active_alerts': [
+        {
+          'type': 'Safety',
+          'message':
+              'High tide and strong winds in Dingalan Bay — small craft advisory',
+          'severity': 'High',
+          'time': '45 minutes ago',
+        }
+      ],
     },
   ];
 
