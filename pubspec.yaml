@@ -43,6 +43,8 @@ dependencies:
   firebase_storage:
   firebase_auth:
   geolocator:
+  flutter_map:
+  mobile_scanner:
 
 dev_dependencies:
   flutter_test:

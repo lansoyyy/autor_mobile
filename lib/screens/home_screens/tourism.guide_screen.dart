@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:autour_mobile/utils/colors.dart';
 import 'package:autour_mobile/widgets/text_widget.dart';
 import 'package:autour_mobile/widgets/button_widget.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 
 class SmartTourismGuideScreen extends StatefulWidget {
   const SmartTourismGuideScreen({super.key});
@@ -232,6 +234,171 @@ class _SmartTourismGuideScreenState extends State<SmartTourismGuideScreen>
     },
   ];
 
+  final List<Map<String, dynamic>> destinations = [
+    {
+      'name': 'Sabang Beach',
+      'municipality': 'Baler',
+      'lat': 15.7580,
+      'lng': 121.5660,
+      'description':
+          'Baler’s iconic surfing spot with a long sandy shore and beginner-friendly waves.',
+      'activities': ['Surfing', 'Swimming', 'Sunrise/Sunset'],
+      'hours': 'Open 24/7',
+      'fees': 'Free (parking/cottage fees may apply)',
+      'tips': [
+        'Beginners should surf near designated areas with instructors.',
+        'Beware of rip currents; check local advisories.',
+      ],
+    },
+    {
+      'name': 'Ditumabo (Mother) Falls',
+      'municipality': 'San Luis',
+      'lat': 15.6930,
+      'lng': 121.5150,
+      'description':
+          'Scenic waterfall reached via a river trek with multiple crossings.',
+      'activities': ['Trekking', 'Swimming', 'Nature'],
+      'hours': '7:00 AM – 4:00 PM (weather-dependent)',
+      'fees': 'Environmental/guide fees apply',
+      'tips': [
+        'Wear proper hiking shoes; expect slippery sections.',
+        'Follow LGU/guide instructions, especially during rains.',
+      ],
+    },
+    {
+      'name': 'Museo de Baler',
+      'municipality': 'Baler',
+      'lat': 15.7582,
+      'lng': 121.5603,
+      'description':
+          'Provincial museum showcasing Aurora’s history and cultural heritage.',
+      'activities': ['Museum', 'Heritage', 'Photography'],
+      'hours': '8:00 AM – 5:00 PM',
+      'fees': 'Minimal entrance fee',
+      'tips': [
+        'Check holidays and special schedules.',
+        'Be respectful of exhibits; no flash when restricted.',
+      ],
+    },
+    {
+      'name': 'Ermita Hill',
+      'municipality': 'Baler',
+      'lat': 15.7436,
+      'lng': 121.5744,
+      'description':
+          'Historic hill with panoramic views of Baler Bay and townscape.',
+      'activities': ['Viewdeck', 'Photography', 'Picnic'],
+      'hours': '6:00 AM – 6:00 PM',
+      'fees': 'Entrance/parking fees may apply',
+      'tips': [
+        'Best visited early morning or late afternoon.',
+        'Mind steps and railings, especially with kids.',
+      ],
+    },
+    {
+      'name': 'Digisit Beach & Rock Formations',
+      'municipality': 'Baler',
+      'lat': 15.6929,
+      'lng': 121.6499,
+      'description':
+          'Rocky coastline with tidal pools and photogenic formations.',
+      'activities': ['Tide Pools', 'Photography', 'Beach Walk'],
+      'hours': 'Open 24/7 (best at low tide)',
+      'fees': 'Cottage/parking fees may apply',
+      'tips': [
+        'Wear aqua shoes; rocks can be sharp and slippery.',
+        'Avoid climbing during strong waves.',
+      ],
+    },
+    {
+      'name': 'Aniao Islets',
+      'municipality': 'Baler',
+      'lat': 15.6836,
+      'lng': 121.6539,
+      'description':
+          'Twin rock islets just off the coast, visible from Digisit area.',
+      'activities': ['Boat Tour', 'Photography'],
+      'hours': 'Weather/tide dependent',
+      'fees': 'Boat fees apply',
+      'tips': [
+        'Coordinate with accredited boatmen only.',
+        'Wear life vests at all times on boats.',
+      ],
+    },
+    {
+      'name': 'Millennium (Balete) Tree',
+      'municipality': 'Maria Aurora',
+      'lat': 15.7965,
+      'lng': 121.4559,
+      'description':
+          'Ancient balete tree and park area popular for families and nature lovers.',
+      'activities': ['Nature Park', 'Leisure'],
+      'hours': '8:00 AM – 5:00 PM',
+      'fees': 'Entrance fees apply',
+      'tips': [
+        'Watch footing around roots.',
+        'Use insect protection.',
+      ],
+    },
+    {
+      'name': 'Dinadiawan Beach',
+      'municipality': 'Dipaculao',
+      'lat': 16.2120,
+      'lng': 121.6735,
+      'description': 'Long, serene white-sand stretch with turquoise waters.',
+      'activities': ['Swimming', 'Snorkeling', 'Camping'],
+      'hours': 'Open 24/7',
+      'fees': 'Resort/parking fees may apply',
+      'tips': [
+        'Expect stronger shore break at times.',
+        'Swim with caution; few lifeguards available.',
+      ],
+    },
+    {
+      'name': 'Dingalan Lighthouse & Viewdeck',
+      'municipality': 'Dingalan',
+      'lat': 15.3890,
+      'lng': 121.4140,
+      'description':
+          'Scenic viewpoint overlooking the Pacific and dramatic cliffs.',
+      'activities': ['Hiking', 'Viewdeck', 'Boat Transfer'],
+      'hours': 'Daytime (weather/sea-state dependent)',
+      'fees': 'Guide/boat fees may apply',
+      'tips': [
+        'Check sea state with the Coast Guard before boating.',
+        'Beware strong winds along ridges.',
+      ],
+    },
+    {
+      'name': 'White Beach (Dingalan)',
+      'municipality': 'Dingalan',
+      'lat': 15.3920,
+      'lng': 121.4150,
+      'description': 'Jump-off area for the lighthouse ridge hike and cove.',
+      'activities': ['Beach', 'Boat Transfer', 'Hike'],
+      'hours': 'Daytime (weather-dependent)',
+      'fees': 'Boat/entrance fees may apply',
+      'tips': [
+        'Secure accredited guides and boats only.',
+        'Wear proper footwear for rocky sections.',
+      ],
+    },
+    {
+      'name': 'Casapsapan Beach',
+      'municipality': 'Casiguran',
+      'lat': 16.2740,
+      'lng': 122.0130,
+      'description': 'Quiet, less-crowded beach near Casiguran Sound.',
+      'activities': ['Swimming', 'Photography', 'Camping'],
+      'hours': 'Open 24/7',
+      'fees': 'Resort/parking fees may apply',
+      'tips': [
+        'Bring cash; limited ATMs nearby.',
+        'Pack out all trash; leave no trace.',
+      ],
+    },
+  ];
+
   List<Map<String, dynamic>> get filteredActivities {
     if (selectedActivity == 'All Activities') {
       return activities;
@@ -351,19 +518,41 @@ class _SmartTourismGuideScreenState extends State<SmartTourismGuideScreen>
           ),
           const SizedBox(height: 20),
           Expanded(
-            child: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: grey.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: grey.withOpacity(0.3)),
-              ),
-              child: const Center(
-                child: Text(
-                  'Map Placeholder\n(Google Maps integration coming soon)',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey, fontSize: 16),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: FlutterMap(
+                options: const MapOptions(
+                  initialCenter:
+                      LatLng(15.90, 121.65), // Aurora province center-ish
+                  initialZoom: 9.0,
                 ),
+                children: [
+                  TileLayer(
+                    urlTemplate:
+                        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    userAgentPackageName: 'com.autour.mobile',
+                  ),
+                  MarkerLayer(
+                    markers: destinations
+                        .map(
+                          (d) => Marker(
+                            width: 45,
+                            height: 45,
+                            point:
+                                LatLng(d['lat'] as double, d['lng'] as double),
+                            child: GestureDetector(
+                              onTap: () => _showDestinationDialog(d),
+                              child: Icon(
+                                Icons.location_on,
+                                color: primary,
+                                size: 40,
+                              ),
+                            ),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                ],
               ),
             ),
           ),
@@ -744,6 +933,151 @@ class _SmartTourismGuideScreenState extends State<SmartTourismGuideScreen>
       default:
         return grey;
     }
+  }
+
+  void _showDestinationDialog(Map<String, dynamic> destination) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            const Icon(Icons.place, color: Colors.teal),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextWidget(
+                    text: destination['name'],
+                    fontSize: 18,
+                    color: black,
+                    fontFamily: 'Bold',
+                  ),
+                  TextWidget(
+                    text: destination['municipality'],
+                    fontSize: 12,
+                    color: grey,
+                    fontFamily: 'Regular',
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if ((destination['description'] as String).isNotEmpty) ...[
+                TextWidget(
+                  text: destination['description'],
+                  fontSize: 12,
+                  color: black,
+                  fontFamily: 'Regular',
+                ),
+                const SizedBox(height: 12),
+              ],
+              Row(
+                children: [
+                  const Icon(Icons.schedule, size: 16, color: Colors.blueGrey),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: TextWidget(
+                      text: 'Hours: ${destination['hours']}',
+                      fontSize: 12,
+                      color: grey,
+                      fontFamily: 'Regular',
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  const Icon(Icons.price_change,
+                      size: 16, color: Colors.blueGrey),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: TextWidget(
+                      text: 'Fees: ${destination['fees']}',
+                      fontSize: 12,
+                      color: grey,
+                      fontFamily: 'Regular',
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              TextWidget(
+                text: 'Popular Activities',
+                fontSize: 14,
+                color: black,
+                fontFamily: 'Bold',
+              ),
+              const SizedBox(height: 4),
+              ...(destination['activities'] as List<dynamic>)
+                  .map((a) => Padding(
+                        padding: const EdgeInsets.only(bottom: 2),
+                        child: Row(
+                          children: [
+                            Icon(Icons.check_circle, color: primary, size: 14),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: TextWidget(
+                                text: a.toString(),
+                                fontSize: 12,
+                                color: grey,
+                                fontFamily: 'Regular',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ))
+                  .toList(),
+              const SizedBox(height: 12),
+              TextWidget(
+                text: 'Tips & Reminders',
+                fontSize: 14,
+                color: black,
+                fontFamily: 'Bold',
+              ),
+              const SizedBox(height: 4),
+              ...(destination['tips'] as List<dynamic>)
+                  .map((t) => Padding(
+                        padding: const EdgeInsets.only(bottom: 2),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('• ', style: TextStyle(fontSize: 12)),
+                            Expanded(
+                              child: TextWidget(
+                                text: t.toString(),
+                                fontSize: 12,
+                                color: grey,
+                                fontFamily: 'Regular',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ))
+                  .toList(),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: TextWidget(
+              text: 'Close',
+              fontSize: 14,
+              color: primary,
+              fontFamily: 'Medium',
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showActivityDetails(Map<String, dynamic> activity) {

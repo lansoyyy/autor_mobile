@@ -259,112 +259,112 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     ),
                   ),
 
-                  const SizedBox(height: 30),
+                  // const SizedBox(height: 30),
 
-                  // AI-Powered Risk Detection & Alert Delivery
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          Colors.orange.withOpacity(0.1),
-                          Colors.red.withOpacity(0.05),
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.orange.withOpacity(0.3)),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: Colors.orange.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Icon(
-                                Icons.psychology,
-                                color: Colors.orange,
-                                size: 24,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  TextWidget(
-                                    text: 'AI-Powered Risk Detection',
-                                    fontSize: 18,
-                                    color: black,
-                                    fontFamily: 'Bold',
-                                  ),
-                                  TextWidget(
-                                    text:
-                                        'Real-time safety alerts based on your location',
-                                    fontSize: 12,
-                                    color: grey,
-                                    fontFamily: 'Regular',
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
+                  // // AI-Powered Risk Detection & Alert Delivery
+                  // Container(
+                  //   width: double.infinity,
+                  //   padding: const EdgeInsets.all(20),
+                  //   decoration: BoxDecoration(
+                  //     gradient: LinearGradient(
+                  //       begin: Alignment.topLeft,
+                  //       end: Alignment.bottomRight,
+                  //       colors: [
+                  //         Colors.orange.withOpacity(0.1),
+                  //         Colors.red.withOpacity(0.05),
+                  //       ],
+                  //     ),
+                  //     borderRadius: BorderRadius.circular(16),
+                  //     border: Border.all(color: Colors.orange.withOpacity(0.3)),
+                  //   ),
+                  //   child: Column(
+                  //     crossAxisAlignment: CrossAxisAlignment.start,
+                  //     children: [
+                  //       Row(
+                  //         children: [
+                  //           Container(
+                  //             padding: const EdgeInsets.all(8),
+                  //             decoration: BoxDecoration(
+                  //               color: Colors.orange.withOpacity(0.2),
+                  //               borderRadius: BorderRadius.circular(8),
+                  //             ),
+                  //             child: Icon(
+                  //               Icons.psychology,
+                  //               color: Colors.orange,
+                  //               size: 24,
+                  //             ),
+                  //           ),
+                  //           const SizedBox(width: 12),
+                  //           Expanded(
+                  //             child: Column(
+                  //               crossAxisAlignment: CrossAxisAlignment.start,
+                  //               children: [
+                  //                 TextWidget(
+                  //                   text: 'AI-Powered Risk Detection',
+                  //                   fontSize: 18,
+                  //                   color: black,
+                  //                   fontFamily: 'Bold',
+                  //                 ),
+                  //                 TextWidget(
+                  //                   text:
+                  //                       'Real-time safety alerts based on your location',
+                  //                   fontSize: 12,
+                  //                   color: grey,
+                  //                   fontFamily: 'Regular',
+                  //                 ),
+                  //               ],
+                  //             ),
+                  //           ),
+                  //         ],
+                  //       ),
+                  //       const SizedBox(height: 16),
 
-                        // Active Alerts
-                        _buildActiveAlert(
-                          'Swimming at Mother Falls',
-                          'Reminder: Sudden water surges may occur at Mother Falls during heavy rain. Please avoid swimming during red alert conditions.',
-                          Icons.pool,
-                          Colors.blue,
-                          'High Risk',
-                          '2 minutes ago',
-                        ),
+                  //       // Active Alerts
+                  //       _buildActiveAlert(
+                  //         'Swimming at Mother Falls',
+                  //         'Reminder: Sudden water surges may occur at Mother Falls during heavy rain. Please avoid swimming during red alert conditions.',
+                  //         Icons.pool,
+                  //         Colors.blue,
+                  //         'High Risk',
+                  //         '2 minutes ago',
+                  //       ),
 
-                        const SizedBox(height: 12),
+                  //       const SizedBox(height: 12),
 
-                        _buildActiveAlert(
-                          'Picnic near Landslide Zone',
-                          'You\'re picnicking near a landslide-prone zone. Please stay alert for falling rocks and avoid setting up near steep slopes.',
-                          Icons.table_bar,
-                          Colors.orange,
-                          'Medium Risk',
-                          '5 minutes ago',
-                        ),
+                  //       _buildActiveAlert(
+                  //         'Picnic near Landslide Zone',
+                  //         'You\'re picnicking near a landslide-prone zone. Please stay alert for falling rocks and avoid setting up near steep slopes.',
+                  //         Icons.table_bar,
+                  //         Colors.orange,
+                  //         'Medium Risk',
+                  //         '5 minutes ago',
+                  //       ),
 
-                        const SizedBox(height: 16),
+                  //       const SizedBox(height: 16),
 
-                        Center(
-                          child: ButtonWidget(
-                            width: 300,
-                            label: 'Safety Guide',
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) =>
-                                      const SmartTourismGuideScreen(),
-                                ),
-                              );
-                            },
-                            color: primary,
-                            textColor: white,
-                            height: 40,
-                            radius: 8,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  //       Center(
+                  //         child: ButtonWidget(
+                  //           width: 300,
+                  //           label: 'Safety Guide',
+                  //           onPressed: () {
+                  //             Navigator.push(
+                  //               context,
+                  //               MaterialPageRoute(
+                  //                 builder: (_) =>
+                  //                     const SmartTourismGuideScreen(),
+                  //               ),
+                  //             );
+                  //           },
+                  //           color: primary,
+                  //           textColor: white,
+                  //           height: 40,
+                  //           radius: 8,
+                  //           fontSize: 14,
+                  //         ),
+                  //       ),
+                  //     ],
+                  //   ),
+                  // ),
 
                   const SizedBox(height: 30),
                 ],

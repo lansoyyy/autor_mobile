@@ -1,9 +1,113 @@
 import 'package:flutter/material.dart';
 import 'package:autour_mobile/utils/colors.dart';
 import 'package:autour_mobile/widgets/text_widget.dart';
+import 'package:autour_mobile/screens/home_screens/qr_scanner_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:convert';
 
 class QrCodeTouristPassScreen extends StatelessWidget {
   const QrCodeTouristPassScreen({super.key});
+
+  Future<void> _storeScan(BuildContext context, String qr) async {
+    // Progress dialog
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        Navigator.of(context).pop(); // close progress
+        await showDialog(
+          context: context,
+          builder: (_) => const AlertDialog(
+            title: Text('Not Logged In'),
+            content: Text('Please log in to record your scan.'),
+          ),
+        );
+        return;
+      }
+
+      // Fetch full user profile from Firestore (created during signup)
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      final userData = userDoc.data() ?? <String, dynamic>{};
+
+      // Try to parse QR payload as JSON to extract destination details
+      Map<String, dynamic>? parsed;
+      try {
+        dynamic decoded = jsonDecode(qr);
+        // Handle cases where the JSON object is string-wrapped
+        if (decoded is String) {
+          decoded = jsonDecode(decoded);
+        }
+        if (decoded is Map<String, dynamic>) {
+          parsed = Map<String, dynamic>.from(decoded);
+        }
+      } catch (_) {
+        // keep parsed null; we'll still store raw string
+      }
+
+      final scanRecord = <String, dynamic>{
+        'userId': user.uid,
+        'userEmail': user.email,
+        'userProfile': userData, // snapshot of full profile at scan time
+        'qrRaw': qr,
+        'qrParsed': parsed,
+        'destinationId': parsed?['id'] ?? parsed?['destinationId'],
+        'destinationName': parsed?['name'] ??
+            parsed?['destinationName'] ??
+            parsed?['spotName'],
+        'municipality': parsed?['municipality'],
+        'scannedAt': FieldValue.serverTimestamp(),
+        'platform': 'flutter',
+      };
+
+      await FirebaseFirestore.instance.collection('scans').add(scanRecord);
+
+      Navigator.of(context).pop(); // close progress
+
+      await showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('Scan recorded'),
+          content: Text(
+            parsed?['name'] != null
+                ? 'Successfully recorded your visit to ${parsed!['name']}.'
+                : 'Your QR scan has been saved.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            )
+          ],
+        ),
+      );
+    } catch (e) {
+      Navigator.of(context).pop(); // close progress
+      await showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('Failed to save scan'),
+          content: Text(e.toString()),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            )
+          ],
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +161,17 @@ class QrCodeTouristPassScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 GestureDetector(
-                  onTap: () {},
+                  onTap: () async {
+                    final result = await Navigator.of(context).push<String>(
+                      MaterialPageRoute(
+                        builder: (_) => const QrScannerScreen(),
+                      ),
+                    );
+                    if (result != null) {
+                      // ignore: use_build_context_synchronously
+                      await _storeScan(context, result);
+                    }
+                  },
                   child: Container(
                     height: 180,
                     width: 180,
