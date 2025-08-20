@@ -21,7 +21,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
         'content':
             'A tale passed down for generations about a young maiden who protected the forest. Her bravery symbolizes Aurora\'s cultural strength.',
         'image':
-            'https://outoftownblog.com/wp-content/uploads/2014/03/Dona-Aurora-Aragon-Quezon-House-600x398.jpg'
+            'https://upload.wikimedia.org/wikipedia/commons/b/b3/Baler%2C_Aurora_%282%29.jpg'
       },
       {
         'title': 'Preserving the Bayanihan Spirit',
@@ -29,7 +29,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
         'content':
             'During community festivals, we practice bayanihan by helping each family prepare. This tradition reminds us to uplift one another.',
         'image':
-            'https://outoftownblog.com/wp-content/uploads/2014/03/Dona-Aurora-Aragon-Quezon-House-600x398.jpg'
+            'https://upload.wikimedia.org/wikipedia/commons/f/ff/Lucio_Quezons_house_at_Baler%2C_Aurora.jpg'
       },
       {
         'title': 'Eco-Guiding by the Elders',
@@ -37,7 +37,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
         'content':
             'We guide visitors to our eco-sites, ensuring they understand the sacredness of nature and the importance of protecting it.',
         'image':
-            'https://outoftownblog.com/wp-content/uploads/2014/03/Dona-Aurora-Aragon-Quezon-House-600x398.jpg'
+            'https://upload.wikimedia.org/wikipedia/commons/0/02/Dingalan_Public_Market_in_Aurora_province.jpg'
       },
     ];
 
@@ -46,16 +46,22 @@ class _CommunityScreenState extends State<CommunityScreen> {
         'title': 'Aurora Ancestral Languages',
         'description':
             'Languages like Ilongot, Tagalog, and Kapampangan reflect Aurora\'s identity. These preserve chants, rituals, and oral storytelling.',
+        'image':
+            'https://upload.wikimedia.org/wikipedia/commons/f/ff/Lucio_Quezons_house_at_Baler%2C_Aurora.jpg',
       },
       {
         'title': 'Traditional Dances & Music',
         'description':
             'Enjoy performances of Pandanggo, Harana, and tribal drumming. These arts show the creativity and soul of the community.',
+        'image':
+            'https://upload.wikimedia.org/wikipedia/commons/b/b3/Baler%2C_Aurora_%282%29.jpg',
       },
       {
         'title': 'Cultural Dos and Don\'ts',
         'description':
             'Respect rituals, remove shoes in sacred homes, greet elders with honor, and observe traditions with mindfulness.',
+        'image':
+            'https://upload.wikimedia.org/wikipedia/commons/0/0a/Baler_Bay_aerial.JPG',
       },
     ];
 
@@ -201,10 +207,18 @@ class _CommunityScreenState extends State<CommunityScreen> {
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: Image.network(
-              'https://outoftownblog.com/wp-content/uploads/2014/03/Dona-Aurora-Aragon-Quezon-House-600x398.jpg',
+              'https://upload.wikimedia.org/wikipedia/commons/0/0a/Baler_Bay_aerial.JPG',
               height: 200,
               width: double.infinity,
               fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => Container(
+                height: 200,
+                width: double.infinity,
+                color: Colors.grey.shade300,
+                alignment: Alignment.center,
+                child: const Icon(Icons.image_not_supported,
+                    color: Colors.grey, size: 40),
+              ),
             ),
           ),
           const SizedBox(height: 16),
@@ -493,10 +507,20 @@ class _CommunityScreenState extends State<CommunityScreen> {
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: Image.network(
-                story['image']!,
+                (story['image'] != null && story['image']!.trim().isNotEmpty)
+                    ? story['image']!
+                    : 'https://upload.wikimedia.org/wikipedia/commons/b/b3/Baler%2C_Aurora_%282%29.jpg',
                 width: double.infinity,
                 height: 200,
                 fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Container(
+                  height: 200,
+                  width: double.infinity,
+                  color: Colors.grey.shade300,
+                  alignment: Alignment.center,
+                  child: const Icon(Icons.image_not_supported,
+                      color: Colors.grey, size: 40),
+                ),
               ),
             ),
             Container(
@@ -554,7 +578,8 @@ class _CommunityScreenState extends State<CommunityScreen> {
             decoration: BoxDecoration(
               image: DecorationImage(
                   image: NetworkImage(
-                    'https://outoftownblog.com/wp-content/uploads/2014/03/Dona-Aurora-Aragon-Quezon-House-600x398.jpg',
+                    item['image'] ??
+                        'https://upload.wikimedia.org/wikipedia/commons/b/b3/Baler%2C_Aurora_%282%29.jpg',
                   ),
                   fit: BoxFit.cover),
             ),
@@ -1443,10 +1468,19 @@ class _StoryDetailScreen extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
             child: Image.network(
-              story['image']!,
+              (story['image'] != null && story['image']!.trim().isNotEmpty)
+                  ? story['image']!
+                  : 'https://upload.wikimedia.org/wikipedia/commons/b/b3/Baler%2C_Aurora_%282%29.jpg',
               height: 200,
               width: double.infinity,
               fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => Container(
+                height: 200,
+                width: double.infinity,
+                color: Colors.grey.shade300,
+                alignment: Alignment.center,
+                child: const Icon(Icons.broken_image, color: Colors.grey),
+              ),
             ),
           ),
           const SizedBox(height: 16),
