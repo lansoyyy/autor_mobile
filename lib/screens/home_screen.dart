@@ -121,21 +121,36 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
         ],
         centerTitle: true,
-        leading: Container(
-          margin: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Center(
-            child: TextWidget(
-              text: 'Logo',
-              fontSize: 14,
-              color: white,
-              fontFamily: 'Bold',
-            ),
-          ),
-        ),
+        leading: FutureBuilder<DocumentSnapshot>(
+            future: FirebaseFirestore.instance
+                .collection('config')
+                .doc('asset')
+                .get(),
+            builder: (BuildContext context,
+                AsyncSnapshot<DocumentSnapshot> snapshot) {
+              if (snapshot.hasError) {
+                return Text("Something went wrong");
+              }
+
+              if (snapshot.hasData && !snapshot.data!.exists) {
+                return Text("Document does not exist");
+              }
+              Map<String, dynamic> data =
+                  snapshot.data!.data() as Map<String, dynamic>;
+              return Padding(
+                padding: const EdgeInsets.all(5.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(5),
+                    image: DecorationImage(
+                      image: NetworkImage(data['logo']),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+              );
+            }),
       ),
       body: SafeArea(
         child: FadeTransition(

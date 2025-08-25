@@ -1,6 +1,7 @@
 import 'package:autour_mobile/screens/auth/signup_screen.dart';
 import 'package:autour_mobile/screens/home_screen.dart';
 import 'package:autour_mobile/utils/colors.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:autour_mobile/widgets/text_widget.dart';
@@ -134,22 +135,35 @@ class _LoginScreenState extends State<LoginScreen>
                   // Animated Logo
                   ScaleTransition(
                     scale: _logoScaleAnimation,
-                    child: Container(
-                      width: 120,
-                      height: 120,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Center(
-                        child: TextWidget(
-                          text: 'Logo',
-                          fontSize: 24,
-                          color: primary,
-                          fontFamily: 'Bold',
-                        ),
-                      ),
-                    ),
+                    child: FutureBuilder<DocumentSnapshot>(
+                        future: FirebaseFirestore.instance
+                            .collection('config')
+                            .doc('asset')
+                            .get(),
+                        builder: (BuildContext context,
+                            AsyncSnapshot<DocumentSnapshot> snapshot) {
+                          if (snapshot.hasError) {
+                            return Text("Something went wrong");
+                          }
+
+                          if (snapshot.hasData && !snapshot.data!.exists) {
+                            return Text("Document does not exist");
+                          }
+                          Map<String, dynamic> data =
+                              snapshot.data!.data() as Map<String, dynamic>;
+                          return Container(
+                            width: 120,
+                            height: 120,
+                            decoration: BoxDecoration(
+                              color: Colors.grey.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(16),
+                              image: DecorationImage(
+                                image: NetworkImage(data['logo']),
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          );
+                        }),
                   ),
 
                   const SizedBox(height: 40),
