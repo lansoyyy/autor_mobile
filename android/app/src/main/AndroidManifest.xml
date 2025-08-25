@@ -29,7 +29,7 @@
         </intent>
     </queries>
     <application
-        android:label="autour_mobile"
+        android:label="AuTour"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
