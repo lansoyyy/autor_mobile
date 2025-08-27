@@ -49,7 +49,7 @@ class _LocalBusinessesScreenState extends State<LocalBusinessesScreen> {
       'prices': data['prices'],
       'fares': data['fares'],
       // Use the provided static image URL for now
-      'image': 'https://live.staticflickr.com/506/19664562909_4ddd66e89f_b.jpg',
+      'image': data['image'],
     };
   }
 
@@ -212,8 +212,7 @@ class _LocalBusinessesScreenState extends State<LocalBusinessesScreen> {
                       category: business['category'] ?? '',
                       location: business['location'] ?? '',
                       description: business['description'] ?? '',
-                      imageUrl:
-                          'https://live.staticflickr.com/506/19664562909_4ddd66e89f_b.jpg',
+                      imageUrl: business['image'],
                       onTap: () {
                         Navigator.push(
                           context,
@@ -479,8 +478,7 @@ class BusinessDetailScreen extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
                 child: Image.network(
-                  business['image'] ??
-                      'https://live.staticflickr.com/506/19664562909_4ddd66e89f_b.jpg',
+                  business['image'],
                   height: 200,
                   width: double.infinity,
                   fit: BoxFit.cover,
@@ -569,7 +567,9 @@ class BusinessDetailScreen extends StatelessWidget {
               // Contact Button
               ButtonWidget(
                 label: 'Contact Business',
-                onPressed: () { _launchPhoneCall(context); },
+                onPressed: () {
+                  _launchPhoneCall(context);
+                },
                 color: primary,
                 textColor: white,
                 width: double.infinity,
