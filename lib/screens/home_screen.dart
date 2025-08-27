@@ -25,6 +25,8 @@ import 'package:autour_mobile/screens/itinerary_screen.dart';
 import 'package:autour_mobile/widgets/date_picker_widget.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:autour_mobile/screens/home_screens/emergency_hotlines_screen.dart';
+import 'package:autour_mobile/utils/alert_manager.dart';
+import 'package:autour_mobile/utils/alert_models.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -39,6 +41,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
   Timer? _locationTimer;
+
+  // Helper to check if the widget is still mounted
+  bool get _isMounted => mounted;
 
   @override
   void initState() {
@@ -1017,8 +1022,34 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         'longitude': pos.longitude,
         'updatedAt': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
+
+      // Check for nearby alerts
+      _checkForNearbyAlerts(pos);
     } catch (e) {
       // Fail silently to avoid interrupting UI; could add debug logs if needed
+    }
+  }
+
+  /// Check for nearby alerts and display them
+  Future<void> _checkForNearbyAlerts(Position position) async {
+    try {
+      List<ActiveAlert> alerts = await AlertManager.checkForAlerts(position);
+      
+      // Display alerts if any are found
+      for (var alert in alerts) {
+        // Use a small delay between alerts to prevent overlapping dialogs
+        await Future.delayed(const Duration(milliseconds: 500));
+        
+        // Show alert on the main thread
+        if (_isMounted) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            AlertManager.showAlert(context, alert);
+          });
+        }
+      }
+    } catch (e) {
+      // Silently handle errors to avoid interrupting the user experience
+      // In a production app, you might want to log this error
     }
   }
 

@@ -521,10 +521,9 @@ class _SmartTourismGuideScreenState extends State<SmartTourismGuideScreen>
             child: ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: FlutterMap(
-                options: const MapOptions(
-                  initialCenter:
-                      LatLng(15.90, 121.65), // Aurora province center-ish
-                  initialZoom: 9.0,
+                options: MapOptions(
+                  center: LatLng(15.90, 121.65), // Aurora province center-ish
+                  zoom: 9.0,
                 ),
                 children: [
                   TileLayer(
@@ -540,7 +539,7 @@ class _SmartTourismGuideScreenState extends State<SmartTourismGuideScreen>
                             height: 45,
                             point:
                                 LatLng(d['lat'] as double, d['lng'] as double),
-                            child: GestureDetector(
+                            builder: (context) => GestureDetector(
                               onTap: () => _showDestinationDialog(d),
                               child: Icon(
                                 Icons.location_on,

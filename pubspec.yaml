@@ -45,6 +45,8 @@ dependencies:
   geolocator:
   flutter_map:
   mobile_scanner:
+  vibration: ^1.7.3
+  http: ^0.13.5
 
 dev_dependencies:
   flutter_test:

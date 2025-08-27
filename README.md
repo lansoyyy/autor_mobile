@@ -1,6 +1,28 @@
-# autour_mobile
+# AuTour Mobile
 
-A new Flutter project.
+A Flutter-based mobile application for tourism in Aurora Province, Philippines.
+
+## Features
+
+- Location-based emergency alerts for tourist destinations
+- Tourism guide and smart tourism features
+- Emergency hotlines and disaster preparedness
+- Health surveillance and community interaction
+- Local businesses directory
+- QR code scanner and pass management
+- Chatbot integration
+- Travel planner and itinerary management
+
+## Location-Based Alert System
+
+The app includes a location-based alert system that shows emergency alerts to users when they are near tourist destinations in Aurora Province and there are active weather or safety alerts for those locations.
+
+### How It Works
+
+1. The app tracks user location every minute
+2. When a user is near a tourist destination, it checks current weather conditions
+3. If weather conditions are dangerous for nearby activities, the app displays an alert dialog with vibration feedback
+4. Vibration intensity varies based on alert severity (High > Medium > Low)
 
 ## Getting Started
 
