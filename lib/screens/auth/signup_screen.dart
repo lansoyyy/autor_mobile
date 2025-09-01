@@ -473,7 +473,6 @@ class _SignUpScreenState extends State<SignUpScreen>
                             label: 'Date of Birth',
                             hint: 'MM/DD/YYYY',
                             controller: dobController,
-                            inputType: TextInputType.datetime,
                             borderColor: primary,
                             hintColor: grey,
                             width: double.infinity,
