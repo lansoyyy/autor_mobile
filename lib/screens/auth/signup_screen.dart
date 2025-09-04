@@ -9,6 +9,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:autour_mobile/screens/home_screen.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:local_auth/local_auth.dart'; // Added for biometric authentication
+import 'package:local_auth/error_codes.dart'
+    as auth_error; // Added for biometric error handling
+import 'package:flutter/services.dart'; // Added for PlatformException
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -38,6 +42,11 @@ class _SignUpScreenState extends State<SignUpScreen>
   bool isObscure = true;
   bool _isLoading = false;
   bool _privacyAccepted = false;
+  bool _biometricsAvailable = false; // Added for biometric availability check
+  bool _useBiometrics = false; // Added for user preference on biometrics
+
+  final LocalAuthentication _auth =
+      LocalAuthentication(); // Added for biometric authentication
 
   late AnimationController _logoAnimationController;
   late AnimationController _formAnimationController;
@@ -64,6 +73,8 @@ class _SignUpScreenState extends State<SignUpScreen>
   @override
   void initState() {
     super.initState();
+
+    _checkBiometricsAvailability(); // Added to check biometric availability
 
     _logoAnimationController = AnimationController(
       duration: const Duration(milliseconds: 1200),
@@ -128,6 +139,15 @@ class _SignUpScreenState extends State<SignUpScreen>
     // Show privacy notice dialog before proceeding
     final accepted = await _showPrivacyNoticeDialog();
     if (!accepted) return;
+
+    // If user wants to use biometrics, authenticate first
+    if (_useBiometrics) {
+      final authenticated = await _authenticateWithBiometrics();
+      if (!authenticated) {
+        await showToast('Biometric authentication failed. Signup cancelled.');
+        return;
+      }
+    }
 
     // Enforce location services and permission before proceeding
     final allow = await _requireLocationServiceAndPermission();
@@ -364,6 +384,70 @@ class _SignUpScreenState extends State<SignUpScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: children,
+      ),
+    );
+  }
+
+  // Added method to build biometric preference section
+  Widget _buildBiometricPreferenceSection() {
+    if (!_biometricsAvailable) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextWidget(
+            text: 'Security Options',
+            fontSize: 20,
+            color: primary,
+            fontFamily: 'Bold',
+            align: TextAlign.left,
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Checkbox(
+                value: _useBiometrics,
+                onChanged: (value) {
+                  setState(() {
+                    _useBiometrics = value ?? false;
+                  });
+                },
+              ),
+              Expanded(
+                child: TextWidget(
+                  text: 'Use fingerprint for secure signup',
+                  fontSize: 16,
+                  color: black,
+                  fontFamily: 'Regular',
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          TextWidget(
+            text:
+                'By enabling this option, you will need to authenticate with your fingerprint to complete the signup process.',
+            fontSize: 14,
+            color: grey,
+            fontFamily: 'Regular',
+          ),
+        ],
       ),
     );
   }
@@ -816,6 +900,9 @@ class _SignUpScreenState extends State<SignUpScreen>
                           ),
                         ]),
 
+                        // Biometric Preference Section (Added)
+                        _buildBiometricPreferenceSection(),
+
                         const SizedBox(height: 24),
 
                         // Sign Up Button
@@ -927,6 +1014,19 @@ class _SignUpScreenState extends State<SignUpScreen>
                       fontFamily: 'Regular',
                     ),
                     const SizedBox(height: 16),
+                    if (_useBiometrics)
+                      Column(
+                        children: [
+                          TextWidget(
+                            text:
+                                'By enabling biometric authentication, your fingerprint data will be securely stored on your device only. This data is never transmitted to our servers or shared with third parties.',
+                            fontSize: 14,
+                            color: black,
+                            fontFamily: 'Regular',
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+                      ),
                     Row(
                       children: [
                         Checkbox(
@@ -981,5 +1081,51 @@ class _SignUpScreenState extends State<SignUpScreen>
           },
         ) ??
         false;
+  }
+
+  // Added method to check biometric availability
+  Future<void> _checkBiometricsAvailability() async {
+    try {
+      final bool canAuthenticateWithBiometrics = await _auth.canCheckBiometrics;
+      final bool canAuthenticate =
+          canAuthenticateWithBiometrics || await _auth.isDeviceSupported();
+      setState(() {
+        _biometricsAvailable = canAuthenticate;
+      });
+    } catch (e) {
+      setState(() {
+        _biometricsAvailable = false;
+      });
+    }
+  }
+
+  // Added method for biometric authentication
+  Future<bool> _authenticateWithBiometrics() async {
+    try {
+      final bool didAuthenticate = await _auth.authenticate(
+        localizedReason: 'Please authenticate to complete signup',
+        options: const AuthenticationOptions(
+          stickyAuth: true,
+          biometricOnly: true,
+        ),
+      );
+      return didAuthenticate;
+    } on PlatformException catch (e) {
+      if (e.code == auth_error.notAvailable) {
+        await showToast('Biometric authentication is not available');
+      } else if (e.code == auth_error.notEnrolled) {
+        await showToast('No biometrics enrolled on this device');
+      } else if (e.code == auth_error.lockedOut) {
+        await showToast('Biometric authentication is locked out');
+      } else if (e.code == auth_error.permanentlyLockedOut) {
+        await showToast('Biometric authentication is permanently locked out');
+      } else {
+        await showToast('Biometric authentication failed');
+      }
+      return false;
+    } catch (e) {
+      await showToast('Biometric authentication error: ${e.toString()}');
+      return false;
+    }
   }
 }
