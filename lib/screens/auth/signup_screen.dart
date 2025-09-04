@@ -399,6 +399,11 @@ class _SignUpScreenState extends State<SignUpScreen>
                         if (snapshot.hasData && !snapshot.data!.exists) {
                           return Text("Document does not exist");
                         }
+                        if (!snapshot.hasData) {
+                          return Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
                         Map<String, dynamic> data =
                             snapshot.data!.data() as Map<String, dynamic>;
                         return Container(
