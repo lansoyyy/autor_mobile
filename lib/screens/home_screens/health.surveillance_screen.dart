@@ -5,6 +5,7 @@ import 'package:autour_mobile/widgets/button_widget.dart';
 import 'package:autour_mobile/widgets/textfield_widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HealthSurveillanceScreen extends StatefulWidget {
   const HealthSurveillanceScreen({super.key});
@@ -20,6 +21,7 @@ class _HealthSurveillanceScreenState extends State<HealthSurveillanceScreen> {
   final TextEditingController symptomsController = TextEditingController();
   final TextEditingController exposureController = TextEditingController();
   final TextEditingController vaccinationController = TextEditingController();
+  final TextEditingController syndromeController = TextEditingController();
   bool hasSymptoms = false;
   bool hasExposure = false;
   bool _submitting = false;
@@ -31,6 +33,7 @@ class _HealthSurveillanceScreenState extends State<HealthSurveillanceScreen> {
     symptomsController.dispose();
     exposureController.dispose();
     vaccinationController.dispose();
+    syndromeController.dispose();
     super.dispose();
   }
 
@@ -106,6 +109,9 @@ class _HealthSurveillanceScreenState extends State<HealthSurveillanceScreen> {
       final vaccination = vaccinationController.text.trim().isEmpty
           ? 'Not Provided'
           : vaccinationController.text.trim();
+      final syndrome = syndromeController.text.trim().isEmpty
+          ? 'None'
+          : syndromeController.text.trim();
 
       final data = <String, dynamic>{
         'userId': uid,
@@ -116,6 +122,7 @@ class _HealthSurveillanceScreenState extends State<HealthSurveillanceScreen> {
         'symptoms': symptomsList ?? symptomsStr,
         'exposure': exposure,
         'vaccination': vaccination,
+        'syndrome': syndrome,
         'createdAt': FieldValue.serverTimestamp(),
         'submittedAt': FieldValue.serverTimestamp(),
       };
@@ -138,6 +145,7 @@ class _HealthSurveillanceScreenState extends State<HealthSurveillanceScreen> {
       symptomsController.clear();
       exposureController.clear();
       vaccinationController.clear();
+      syndromeController.clear();
       setState(() {
         hasSymptoms = false;
         hasExposure = false;
@@ -150,6 +158,40 @@ class _HealthSurveillanceScreenState extends State<HealthSurveillanceScreen> {
       ));
     } finally {
       if (mounted) setState(() => _submitting = false);
+    }
+  }
+
+  Future<void> _callEmergency() async {
+    String emergencyNumber = '911'; // Default emergency number
+    try {
+      // Try to get emergency number from settings
+      final doc = await FirebaseFirestore.instance
+          .collection('settings')
+          .doc('emergency')
+          .get();
+      final number = doc.data()?['defaultNumber'];
+      if (number != null && number.toString().isNotEmpty) {
+        emergencyNumber = number.toString().trim();
+      }
+    } catch (_) {
+      // Use default if failed to fetch
+    }
+
+    final Uri uri = Uri(scheme: 'tel', path: emergencyNumber);
+    try {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: TextWidget(
+                text: 'Failed to launch dialer: $e',
+                fontSize: 14,
+                color: white),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -232,6 +274,23 @@ class _HealthSurveillanceScreenState extends State<HealthSurveillanceScreen> {
                   align: TextAlign.left,
                 ),
                 const SizedBox(height: 12),
+                
+                // Emergency Button
+                Container(
+                  width: double.infinity,
+                  margin: const EdgeInsets.only(bottom: 20),
+                  child: ButtonWidget(
+                    label: 'EMERGENCY - Call Now',
+                    onPressed: _callEmergency,
+                    color: Colors.red,
+                    textColor: white,
+                    width: double.infinity,
+                    height: 50,
+                    radius: 8,
+                    fontSize: 16,
+                  ),
+                ),
+                
                 // Health Declaration Section
                 _buildSectionHeader('Health Declaration'),
                 _buildSection([
@@ -335,6 +394,31 @@ class _HealthSurveillanceScreenState extends State<HealthSurveillanceScreen> {
                       },
                     ),
                 ]),
+                
+                // Syndrome Reporting Section
+                _buildSectionHeader('Syndrome Reporting'),
+                _buildSection([
+                  TextFieldWidget(
+                    label: 'Report Syndromes (Optional)',
+                    hint: 'E.g., Influenza-like illness, Diarrheal disease',
+                    controller: syndromeController,
+                    borderColor: primary,
+                    hintColor: grey,
+                    width: double.infinity,
+                    height: 50,
+                    radius: 8,
+                    maxLine: 3,
+                    hasValidator: false,
+                  ),
+                  const SizedBox(height: 8),
+                  TextWidget(
+                    text: 'Report any syndromes or disease patterns you\'ve observed in your area.',
+                    fontSize: 12,
+                    color: grey,
+                    fontFamily: 'Regular',
+                  ),
+                ]),
+                
                 // Vaccination & Health Status Section
                 _buildSectionHeader('Vaccination & Health Status (Optional)'),
                 _buildSection([
@@ -351,6 +435,7 @@ class _HealthSurveillanceScreenState extends State<HealthSurveillanceScreen> {
                     maxLine: 2,
                   ),
                 ]),
+                
                 // Submit Button
                 const SizedBox(height: 12),
                 ButtonWidget(

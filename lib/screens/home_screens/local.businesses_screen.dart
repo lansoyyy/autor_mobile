@@ -564,6 +564,11 @@ class BusinessDetailScreen extends StatelessWidget {
 
               const SizedBox(height: 30),
 
+              // Reviews Section
+              ReviewsSection(businessId: business['name']),
+
+              const SizedBox(height: 30),
+
               // Contact Button
               ButtonWidget(
                 label: 'Contact Business',
@@ -819,6 +824,284 @@ class BusinessDetailScreen extends StatelessWidget {
               ],
             ],
           ),
+        ),
+      ],
+    );
+  }
+}
+
+// New ReviewsSection Widget
+class ReviewsSection extends StatefulWidget {
+  final String businessId;
+
+  const ReviewsSection({super.key, required this.businessId});
+
+  @override
+  State<ReviewsSection> createState() => _ReviewsSectionState();
+}
+
+class _ReviewsSectionState extends State<ReviewsSection> {
+  final TextEditingController _reviewController = TextEditingController();
+  double _rating = 5.0;
+
+  @override
+  void dispose() {
+    _reviewController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submitReview() async {
+    if (_reviewController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: TextWidget(
+            text: 'Please enter a review',
+            fontSize: 14,
+            color: white,
+          ),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    try {
+      await FirebaseFirestore.instance.collection('reviews').add({
+        'businessId': widget.businessId,
+        'review': _reviewController.text.trim(),
+        'rating': _rating,
+        'timestamp': FieldValue.serverTimestamp(),
+        'userId':
+            'anonymous', // In a real app, this would be the actual user ID
+      });
+
+      // Clear the form
+      setState(() {
+        _reviewController.clear();
+        _rating = 5.0;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: TextWidget(
+            text: 'Review submitted successfully!',
+            fontSize: 14,
+            color: white,
+          ),
+          backgroundColor: Colors.green,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: TextWidget(
+            text: 'Failed to submit review. Please try again.',
+            fontSize: 14,
+            color: white,
+          ),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextWidget(
+          text: 'Reviews',
+          fontSize: 18,
+          color: black,
+          fontFamily: 'Bold',
+        ),
+        const SizedBox(height: 16),
+        // Add Review Form
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: grey.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: primary.withOpacity(0.3)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextWidget(
+                text: 'Add Your Review',
+                fontSize: 16,
+                color: black,
+                fontFamily: 'Bold',
+              ),
+              const SizedBox(height: 12),
+              // Rating Selector
+              TextWidget(
+                text: 'Rating:',
+                fontSize: 14,
+                color: grey,
+                fontFamily: 'Regular',
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  for (int i = 1; i <= 5; i++)
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _rating = i.toDouble();
+                        });
+                      },
+                      child: Icon(
+                        i <= _rating ? Icons.star : Icons.star_border,
+                        color: i <= _rating ? Colors.amber : grey,
+                        size: 30,
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              // Review Text Field
+              TextField(
+                controller: _reviewController,
+                maxLines: 3,
+                decoration: InputDecoration(
+                  hintText: 'Share your experience...',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: grey),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: primary),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              // Submit Button
+              Align(
+                alignment: Alignment.centerRight,
+                child: ButtonWidget(
+                  label: 'Submit Review',
+                  onPressed: _submitReview,
+                  color: primary,
+                  textColor: white,
+                  width: 120,
+                  height: 40,
+                  radius: 8,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 20),
+        // Display Reviews
+        StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('reviews')
+              .where('businessId', isEqualTo: widget.businessId)
+              .orderBy('timestamp', descending: true)
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (snapshot.hasError) {
+              return Center(
+                child: TextWidget(
+                  text: 'Failed to load reviews',
+                  fontSize: 14,
+                  color: grey,
+                  fontFamily: 'Regular',
+                ),
+              );
+            }
+
+            final reviews = snapshot.data?.docs ?? [];
+
+            if (reviews.isEmpty) {
+              return Center(
+                child: TextWidget(
+                  text: 'No reviews yet. Be the first to review!',
+                  fontSize: 14,
+                  color: grey,
+                  fontFamily: 'Regular',
+                ),
+              );
+            }
+
+            return Column(
+              children: reviews.map((doc) {
+                final data = doc.data() as Map<String, dynamic>;
+                final rating = data['rating']?.toDouble() ?? 0.0;
+                final review = data['review']?.toString() ?? '';
+                final timestamp = data['timestamp'] as Timestamp?;
+                final date = timestamp != null
+                    ? DateTime.fromMillisecondsSinceEpoch(
+                        timestamp.millisecondsSinceEpoch)
+                    : DateTime.now();
+
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: white,
+                    borderRadius: BorderRadius.circular(8),
+                    boxShadow: [
+                      BoxShadow(
+                        color: grey.withOpacity(0.1),
+                        blurRadius: 4,
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Rating Stars
+                      Row(
+                        children: [
+                          for (int i = 1; i <= 5; i++)
+                            Icon(
+                              i <= rating ? Icons.star : Icons.star_border,
+                              color: i <= rating ? Colors.amber : grey,
+                              size: 16,
+                            ),
+                          const SizedBox(width: 8),
+                          TextWidget(
+                            text: rating.toString(),
+                            fontSize: 12,
+                            color: grey,
+                            fontFamily: 'Regular',
+                          ),
+                          const Spacer(),
+                          TextWidget(
+                            text: '${date.day}/${date.month}/${date.year}',
+                            fontSize: 12,
+                            color: grey,
+                            fontFamily: 'Regular',
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      // Review Text
+                      TextWidget(
+                        text: review,
+                        fontSize: 14,
+                        color: black,
+                        fontFamily: 'Regular',
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+            );
+          },
         ),
       ],
     );

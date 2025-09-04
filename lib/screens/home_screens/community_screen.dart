@@ -3,6 +3,7 @@ import 'package:autour_mobile/utils/colors.dart';
 import 'package:autour_mobile/widgets/text_widget.dart';
 import 'package:autour_mobile/widgets/button_widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class CommunityScreen extends StatefulWidget {
   const CommunityScreen({super.key});
@@ -12,6 +13,15 @@ class CommunityScreen extends StatefulWidget {
 }
 
 class _CommunityScreenState extends State<CommunityScreen> {
+  // Add this controller for reviews
+  final TextEditingController _reviewController = TextEditingController();
+
+  @override
+  void dispose() {
+    _reviewController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final List<Map<String, String>> stories = [
@@ -480,7 +490,11 @@ class _CommunityScreenState extends State<CommunityScreen> {
     );
   }
 
+  // Modify the _buildStoryCard method to include image fetching and review button
   Widget _buildStoryCard(BuildContext context, Map<String, String> story) {
+    // Generate a unique ID for the story (in a real app, this would come from Firebase)
+    final storyId = story['title']?.hashCode.toString() ?? 'unknown';
+
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -562,59 +576,11 @@ class _CommunityScreenState extends State<CommunityScreen> {
     );
   }
 
-  Widget _buildHeritageCard(Map<String, String> item) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        color: secondary.withOpacity(0.1),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 75,
-            height: 75,
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                  image: NetworkImage(
-                    item['image'] ??
-                        'https://upload.wikimedia.org/wikipedia/commons/b/b3/Baler%2C_Aurora_%282%29.jpg',
-                  ),
-                  fit: BoxFit.cover),
-            ),
-          ),
-          SizedBox(
-            width: 10,
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextWidget(
-                text: item['title']!,
-                fontSize: 16,
-                color: primary,
-                fontFamily: 'Bold',
-              ),
-              const SizedBox(height: 6),
-              SizedBox(
-                width: 225,
-                child: TextWidget(
-                  text: item['description']!,
-                  fontSize: 13,
-                  color: black,
-                  fontFamily: 'Regular',
-                  maxLines: 20,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+  // Modify the _buildHeritageCard method to include image fetching and reviews display
+  Widget _buildHeritageCard(Map<String, dynamic> item) {
+    // Generate a unique ID for the heritage item
+    final itemId = item['title']?.toString().hashCode.toString() ?? 'unknown';
 
-  Widget _buildRulesCard(Map<String, dynamic> rule) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
@@ -625,14 +591,66 @@ class _CommunityScreenState extends State<CommunityScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          TextWidget(
-            text: rule['title']!,
-            fontSize: 18,
-            color: primary,
-            fontFamily: 'Bold',
+          Row(
+            children: [
+              Container(
+                width: 75,
+                height: 75,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  image: DecorationImage(
+                    image: NetworkImage(
+                      item['image'] ??
+                          'https://upload.wikimedia.org/wikipedia/commons/b/b3/Baler%2C_Aurora_%282%29.jpg',
+                    ),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextWidget(
+                      text: item['title']!.toString(),
+                      fontSize: 16,
+                      color: primary,
+                      fontFamily: 'Bold',
+                    ),
+                    const SizedBox(height: 6),
+                    TextWidget(
+                      text: item['description']!.toString(),
+                      fontSize: 13,
+                      color: black,
+                      fontFamily: 'Regular',
+                      maxLines: 3,
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 12),
-          ...rule['items']!.map((item) => _buildRuleItem(item)).toList(),
+          // Add review button
+          Align(
+            alignment: Alignment.centerRight,
+            child: ButtonWidget(
+              label: 'Leave Review',
+              onPressed: () {
+                _showReviewDialog('community_heritage', itemId);
+              },
+              color: primary,
+              textColor: white,
+              width: 120,
+              height: 36,
+              radius: 8,
+              fontSize: 12,
+            ),
+          ),
+          const SizedBox(height: 12),
+          // Display reviews
+          _buildReviewsSection('community_heritage', itemId),
         ],
       ),
     );
@@ -659,7 +677,11 @@ class _CommunityScreenState extends State<CommunityScreen> {
     );
   }
 
-  Widget _buildSustainabilityCard(Map<String, dynamic> info) {
+  // Modify the _buildRulesCard method to include reviews display
+  Widget _buildRulesCard(Map<String, dynamic> rule) {
+    // Generate a unique ID for the rule
+    final ruleId = rule['title']?.toString().hashCode.toString() ?? 'unknown';
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
@@ -671,22 +693,35 @@ class _CommunityScreenState extends State<CommunityScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           TextWidget(
-            text: info['title']!,
+            text: rule['title']!.toString(),
             fontSize: 18,
             color: primary,
             fontFamily: 'Bold',
           ),
           const SizedBox(height: 12),
-          TextWidget(
-            text: info['description']!,
-            fontSize: 14,
-            color: black,
-            fontFamily: 'Regular',
+          ...rule['items']!
+              .map((item) => _buildRuleItem(item.toString()))
+              .toList(),
+          const SizedBox(height: 12),
+          // Add review button
+          Align(
+            alignment: Alignment.centerRight,
+            child: ButtonWidget(
+              label: 'Leave Review',
+              onPressed: () {
+                _showReviewDialog('community_rules', ruleId);
+              },
+              color: primary,
+              textColor: white,
+              width: 120,
+              height: 36,
+              radius: 8,
+              fontSize: 12,
+            ),
           ),
           const SizedBox(height: 12),
-          ...info['initiatives']!
-              .map((initiative) => _buildSustainabilityItem(initiative))
-              .toList(),
+          // Display reviews
+          _buildReviewsSection('community_rules', ruleId),
         ],
       ),
     );
@@ -713,7 +748,11 @@ class _CommunityScreenState extends State<CommunityScreen> {
     );
   }
 
-  Widget _buildPreservationCard(Map<String, dynamic> preservation) {
+  // Modify the _buildSustainabilityCard method to include reviews display
+  Widget _buildSustainabilityCard(Map<String, dynamic> info) {
+    // Generate a unique ID for the sustainability info
+    final infoId = info['title']?.toString().hashCode.toString() ?? 'unknown';
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
@@ -725,22 +764,43 @@ class _CommunityScreenState extends State<CommunityScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           TextWidget(
-            text: preservation['title']!,
+            text: info['title']!.toString(),
             fontSize: 18,
             color: primary,
             fontFamily: 'Bold',
           ),
           const SizedBox(height: 12),
           TextWidget(
-            text: preservation['description']!,
+            text: info['description']!.toString(),
             fontSize: 14,
             color: black,
             fontFamily: 'Regular',
           ),
           const SizedBox(height: 12),
-          ...preservation['practices']!
-              .map((practice) => _buildPreservationItem(practice))
+          ...info['initiatives']!
+              .map((initiative) =>
+                  _buildSustainabilityItem(initiative.toString()))
               .toList(),
+          const SizedBox(height: 12),
+          // Add review button
+          Align(
+            alignment: Alignment.centerRight,
+            child: ButtonWidget(
+              label: 'Leave Review',
+              onPressed: () {
+                _showReviewDialog('community_sustainability', infoId);
+              },
+              color: primary,
+              textColor: white,
+              width: 120,
+              height: 36,
+              radius: 8,
+              fontSize: 12,
+            ),
+          ),
+          const SizedBox(height: 12),
+          // Display reviews
+          _buildReviewsSection('community_sustainability', infoId),
         ],
       ),
     );
@@ -764,6 +824,177 @@ class _CommunityScreenState extends State<CommunityScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  // Modify the _buildPreservationCard method to include reviews display
+  Widget _buildPreservationCard(Map<String, dynamic> preservation) {
+    // Generate a unique ID for the preservation info
+    final preservationId =
+        preservation['title']?.toString().hashCode.toString() ?? 'unknown';
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: secondary.withOpacity(0.1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextWidget(
+            text: preservation['title']!.toString(),
+            fontSize: 18,
+            color: primary,
+            fontFamily: 'Bold',
+          ),
+          const SizedBox(height: 12),
+          TextWidget(
+            text: preservation['description']!.toString(),
+            fontSize: 14,
+            color: black,
+            fontFamily: 'Regular',
+          ),
+          const SizedBox(height: 12),
+          ...preservation['practices']!
+              .map((practice) => _buildPreservationItem(practice.toString()))
+              .toList(),
+          const SizedBox(height: 12),
+          // Add review button
+          Align(
+            alignment: Alignment.centerRight,
+            child: ButtonWidget(
+              label: 'Leave Review',
+              onPressed: () {
+                _showReviewDialog('community_preservation', preservationId);
+              },
+              color: primary,
+              textColor: white,
+              width: 120,
+              height: 36,
+              radius: 8,
+              fontSize: 12,
+            ),
+          ),
+          const SizedBox(height: 12),
+          // Display reviews
+          _buildReviewsSection('community_preservation', preservationId),
+        ],
+      ),
+    );
+  }
+
+  // Add this method to build the reviews section
+  Widget _buildReviewsSection(String collection, String documentId) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('reviews')
+          .where('collection', isEqualTo: collection)
+          .where('documentId', isEqualTo: documentId)
+          .orderBy('timestamp', descending: true)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 8.0),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        if (snapshot.hasError) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: TextWidget(
+              text: 'Failed to load reviews',
+              fontSize: 12,
+              color: Colors.red,
+              fontFamily: 'Regular',
+            ),
+          );
+        }
+
+        final reviews = snapshot.data?.docs ?? [];
+
+        if (reviews.isEmpty) {
+          return const SizedBox.shrink();
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Divider(height: 16),
+            TextWidget(
+              text: 'Reviews (${reviews.length})',
+              fontSize: 14,
+              color: primary,
+              fontFamily: 'Bold',
+            ),
+            const SizedBox(height: 8),
+            ...reviews.map((doc) {
+              final data = doc.data() as Map<String, dynamic>;
+              final userName = data['userName']?.toString() ?? 'Anonymous';
+              final review = data['review']?.toString() ?? '';
+              final timestamp = data['timestamp'] as Timestamp?;
+
+              String timeAgo = '';
+              if (timestamp != null) {
+                final now = DateTime.now();
+                final reviewTime = timestamp.toDate();
+                final difference = now.difference(reviewTime);
+
+                if (difference.inDays > 0) {
+                  timeAgo = '${difference.inDays}d ago';
+                } else if (difference.inHours > 0) {
+                  timeAgo = '${difference.inHours}h ago';
+                } else if (difference.inMinutes > 0) {
+                  timeAgo = '${difference.inMinutes}m ago';
+                } else {
+                  timeAgo = 'Just now';
+                }
+              }
+
+              return Container(
+                margin: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: grey.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        TextWidget(
+                          text: userName,
+                          fontSize: 12,
+                          color: primary,
+                          fontFamily: 'Bold',
+                        ),
+                        const SizedBox(width: 8),
+                        TextWidget(
+                          text: timeAgo,
+                          fontSize: 10,
+                          color: grey,
+                          fontFamily: 'Regular',
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    TextWidget(
+                      text: review,
+                      fontSize: 12,
+                      color: black,
+                      fontFamily: 'Regular',
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ],
+        );
+      },
     );
   }
 
@@ -1411,6 +1642,118 @@ class _CommunityScreenState extends State<CommunityScreen> {
                 fontSize: 14,
                 color: primary,
                 fontFamily: 'Medium',
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Add this method to submit reviews
+  Future<void> _submitReview(String collection, String documentId) async {
+    if (_reviewController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: TextWidget(
+            text: 'Please enter a review',
+            fontSize: 14,
+            color: white,
+          ),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      final userId = user?.uid ?? 'anonymous';
+      final userName = user?.displayName ?? 'Anonymous User';
+
+      await FirebaseFirestore.instance.collection('reviews').add({
+        'collection': collection,
+        'documentId': documentId,
+        'userId': userId,
+        'userName': userName,
+        'review': _reviewController.text.trim(),
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      // Clear the review field
+      _reviewController.clear();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: TextWidget(
+            text: 'Review submitted successfully!',
+            fontSize: 14,
+            color: white,
+          ),
+          backgroundColor: Colors.green,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: TextWidget(
+            text: 'Failed to submit review. Please try again.',
+            fontSize: 14,
+            color: white,
+          ),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  // Add this method to show review dialog
+  void _showReviewDialog(String collection, String documentId) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: TextWidget(
+            text: 'Leave a Review',
+            fontSize: 18,
+            color: black,
+            fontFamily: 'Bold',
+          ),
+          content: TextField(
+            controller: _reviewController,
+            maxLines: 3,
+            decoration: InputDecoration(
+              hintText: 'Share your thoughts...',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: TextWidget(
+                text: 'Cancel',
+                fontSize: 14,
+                color: grey,
+                fontFamily: 'Medium',
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _submitReview(collection, documentId);
+              },
+              child: TextWidget(
+                text: 'Submit',
+                fontSize: 14,
+                color: primary,
+                fontFamily: 'Bold',
               ),
             ),
           ],

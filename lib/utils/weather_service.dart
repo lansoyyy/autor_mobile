@@ -6,7 +6,8 @@ import 'alert_models.dart';
 
 class WeatherService {
   /// Fetch weather data for a specific location
-  static Future<Map<String, dynamic>?> fetchWeatherData(double lat, double lon) async {
+  static Future<Map<String, dynamic>?> fetchWeatherData(
+      double lat, double lon) async {
     if (WeatherConfig.weatherApiKey.isEmpty) {
       print('Missing OpenWeather API key');
       return null;
@@ -36,14 +37,17 @@ class WeatherService {
     List<ActiveAlert> weatherAlerts = [];
 
     try {
-      final weatherData = await fetchWeatherData(position.latitude, position.longitude);
+      final weatherData =
+          await fetchWeatherData(position.latitude, position.longitude);
       if (weatherData == null) return weatherAlerts;
 
       // Extract relevant weather information
-      final weatherDescription = (weatherData['weather']?[0]?['description'] ?? '').toString();
-      final double windSpeed = (weatherData['wind']?['speed'] ?? 0).toDouble() * 3.6; // Convert m/s to km/h
+      final weatherDescription =
+          (weatherData['weather']?[0]?['description'] ?? '').toString();
+      final double windSpeed = (weatherData['wind']?['speed'] ?? 0).toDouble() *
+          3.6; // Convert m/s to km/h
       final int humidity = (weatherData['main']?['humidity'] ?? 0).toInt();
-      
+
       // Check for precipitation
       double precipitation = 0.0;
       if (weatherData['rain'] != null && weatherData['rain']['1h'] != null) {
@@ -64,25 +68,35 @@ class WeatherService {
           String severity = 'Low';
 
           // Check if activity is affected by current weather
-          if (activity.name.contains('Surfing') && (hasHighWind || hasHeavyRain)) {
+          if (activity.name.contains('Surfing') &&
+              (hasHighWind || hasHeavyRain)) {
             shouldAlert = true;
-            alertMessage = 'Strong winds and/or heavy rain reported. Surfing conditions may be dangerous.';
+            alertMessage =
+                'Strong winds and/or heavy rain reported. Surfing conditions may be dangerous.';
             severity = hasHighWind ? 'High' : 'Medium';
           } else if (activity.name.contains('Waterfall') && hasHeavyRain) {
             shouldAlert = true;
-            alertMessage = 'Heavy rain reported. Waterfall trekking may be dangerous due to slippery trails and rising water levels.';
+            alertMessage =
+                'Heavy rain reported. Waterfall trekking may be dangerous due to slippery trails and rising water levels.';
             severity = 'High';
-          } else if (activity.name.contains('Hiking') && (hasHeavyRain || hasHighWind)) {
+          } else if (activity.name.contains('Hiking') &&
+              (hasHeavyRain || hasHighWind)) {
             shouldAlert = true;
-            alertMessage = 'Adverse weather conditions reported. Hiking may be dangerous due to slippery trails and strong winds.';
+            alertMessage =
+                'Adverse weather conditions reported. Hiking may be dangerous due to slippery trails and strong winds.';
             severity = hasHeavyRain ? 'High' : 'Medium';
-          } else if (activity.name.contains('Beach') && (hasHighWind || hasHeavyRain)) {
+          } else if (activity.name.contains('Beach') &&
+              (hasHighWind || hasHeavyRain)) {
             shouldAlert = true;
-            alertMessage = 'Bad weather conditions at beach. Swimming and beach activities may be dangerous.';
+            alertMessage =
+                'Bad weather conditions at beach. Swimming and beach activities may be dangerous.';
             severity = hasHighWind ? 'High' : 'Medium';
-          } else if (hasHeavyRain && (activity.riskLevel == 'High' || activity.riskLevel == 'Medium')) {
+          } else if (hasHeavyRain &&
+              (activity.riskLevel == 'High' ||
+                  activity.riskLevel == 'Medium')) {
             shouldAlert = true;
-            alertMessage = 'Heavy rain reported. ${activity.name} may be dangerous in current conditions.';
+            alertMessage =
+                'Heavy rain reported. ${activity.name} may be dangerous in current conditions.';
             severity = 'Medium';
           }
 
@@ -106,12 +120,14 @@ class WeatherService {
   /// Get a simple weather description for display
   static Future<String> getCurrentWeatherDescription(Position position) async {
     try {
-      final weatherData = await fetchWeatherData(position.latitude, position.longitude);
+      final weatherData =
+          await fetchWeatherData(position.latitude, position.longitude);
       if (weatherData == null) return 'Weather data unavailable';
 
-      final weatherDescription = (weatherData['weather']?[0]?['description'] ?? '').toString();
+      final weatherDescription =
+          (weatherData['weather']?[0]?['description'] ?? '').toString();
       final double temp = (weatherData['main']?['temp'] ?? 0).toDouble();
-      
+
       return '${weatherDescription.capitalize()}, ${temp.toStringAsFixed(1)}°C';
     } catch (e) {
       return 'Weather data unavailable';

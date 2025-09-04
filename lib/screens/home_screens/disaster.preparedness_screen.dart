@@ -112,6 +112,58 @@ class DisasterPreparednessScreen extends StatelessWidget {
 
               const SizedBox(height: 20),
 
+              // Oceanographic Data
+              StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('current_weather')
+                    .orderBy('updatedAt', descending: true)
+                    .limit(1)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const SizedBox();
+                  }
+                  if (snapshot.hasError) {
+                    return const SizedBox();
+                  }
+                  final docs = snapshot.data?.docs ?? [];
+                  if (docs.isEmpty) {
+                    return const SizedBox();
+                  }
+                  final weatherData = _mapWeatherData(
+                      docs.first.data() as Map<String, dynamic>);
+                  return _buildOceanographicDataCard(weatherData);
+                },
+              ),
+
+              const SizedBox(height: 20),
+
+              // Atmospheric Data
+              StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('current_weather')
+                    .orderBy('updatedAt', descending: true)
+                    .limit(1)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const SizedBox();
+                  }
+                  if (snapshot.hasError) {
+                    return const SizedBox();
+                  }
+                  final docs = snapshot.data?.docs ?? [];
+                  if (docs.isEmpty) {
+                    return const SizedBox();
+                  }
+                  final weatherData = _mapWeatherData(
+                      docs.first.data() as Map<String, dynamic>);
+                  return _buildAtmosphericDataCard(weatherData);
+                },
+              ),
+
+              const SizedBox(height: 20),
+
               // AI Suggestions Header
               Row(
                 children: [
@@ -211,6 +263,21 @@ class DisasterPreparednessScreen extends StatelessWidget {
     final precipStr = (precip1h == null || precip1h.toString().isEmpty)
         ? '-'
         : '${precip1h.toString()} mm (1h)';
+
+    // Oceanographic data
+    final tideLevel = data['tide_level_m'];
+    final tideTime = data['tide_time'];
+    final waveHeight = data['wave_height_m'];
+    final wavePeriod = data['wave_period_s'];
+    final swellDirection = data['swell_direction_deg'];
+    final swellSize = data['swell_size_m'];
+    final waterTemp = data['water_temperature_c'];
+
+    // Atmospheric data
+    final uvIndex = data['uv_index'];
+    final pressure = data['pressure_hpa'];
+    final fronts = data['atmospheric_fronts'];
+
     return {
       'location': (data['region'] ?? 'Aurora, PH').toString(),
       'temperature': withUnit(data['temperature_c'], '°C'),
@@ -219,11 +286,23 @@ class DisasterPreparednessScreen extends StatelessWidget {
       'humidity': withUnit(data['humidity'], '%'),
       'wind_speed': withUnit(data['wind_kmh'], ' km/h'),
       'visibility': withUnit(data['visibility_km'], ' km'),
-      'uv_index': '-',
+      'uv_index': withUnit(uvIndex, ''),
       'sunrise': _fmtUnix(data['sunrise_unix']),
       'sunset': _fmtUnix(data['sunset_unix']),
       'precipitation': precipStr,
-      'pressure': withUnit(data['pressure_hpa'], ' hPa'),
+      'pressure': withUnit(pressure, ' hPa'),
+
+      // Oceanographic data
+      'tide_level': withUnit(tideLevel, 'm'),
+      'tide_time': tideTime?.toString() ?? '-',
+      'wave_height': withUnit(waveHeight, 'm'),
+      'wave_period': withUnit(wavePeriod, 's'),
+      'swell_direction': withUnit(swellDirection, '°'),
+      'swell_size': withUnit(swellSize, 'm'),
+      'water_temperature': withUnit(waterTemp, '°C'),
+
+      // Atmospheric data
+      'atmospheric_fronts': fronts?.toString() ?? '-',
     };
   }
 
@@ -809,5 +888,239 @@ class DisasterPreparednessScreen extends StatelessWidget {
       final uri = Uri(scheme: 'tel', path: fallbackNumber);
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     }
+  }
+
+  Widget _buildOceanographicDataCard(Map<String, String> weatherData) {
+    final details = [
+      {
+        'label': 'Tide Level',
+        'value': weatherData['tide_level']!,
+        'icon': Icons.waves
+      },
+      {
+        'label': 'Tide Time',
+        'value': weatherData['tide_time']!,
+        'icon': Icons.access_time
+      },
+      {
+        'label': 'Wave Height',
+        'value': weatherData['wave_height']!,
+        'icon': Icons.show_chart
+      },
+      {
+        'label': 'Wave Period',
+        'value': weatherData['wave_period']!,
+        'icon': Icons.timelapse
+      },
+      {
+        'label': 'Swell Direction',
+        'value': weatherData['swell_direction']!,
+        'icon': Icons.navigation
+      },
+      {
+        'label': 'Swell Size',
+        'value': weatherData['swell_size']!,
+        'icon': Icons.linear_scale
+      },
+      {
+        'label': 'Water Temp',
+        'value': weatherData['water_temperature']!,
+        'icon': Icons.opacity
+      },
+    ];
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: grey.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.waves,
+                color: primary,
+                size: 24,
+              ),
+              const SizedBox(width: 8),
+              TextWidget(
+                text: 'Oceanographic Data',
+                fontSize: 16,
+                color: black,
+                fontFamily: 'Bold',
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              childAspectRatio: 2.5,
+            ),
+            itemCount: details.length,
+            itemBuilder: (context, index) {
+              final detail = details[index];
+              return Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: grey.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      detail['icon'] as IconData,
+                      color: primary,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          TextWidget(
+                            text: detail['label'].toString(),
+                            fontSize: 12,
+                            color: grey,
+                            fontFamily: 'Regular',
+                          ),
+                          TextWidget(
+                            text: detail['value'].toString(),
+                            fontSize: 14,
+                            color: black,
+                            fontFamily: 'Bold',
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAtmosphericDataCard(Map<String, String> weatherData) {
+    final details = [
+      {
+        'label': 'UV Index',
+        'value': weatherData['uv_index']!,
+        'icon': Icons.wb_sunny
+      },
+      {
+        'label': 'Pressure',
+        'value': weatherData['pressure']!,
+        'icon': Icons.speed
+      },
+      {
+        'label': 'Fronts',
+        'value': weatherData['atmospheric_fronts']!,
+        'icon': Icons.air
+      },
+    ];
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: grey.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.air,
+                color: primary,
+                size: 24,
+              ),
+              const SizedBox(width: 8),
+              TextWidget(
+                text: 'Atmospheric Data',
+                fontSize: 16,
+                color: black,
+                fontFamily: 'Bold',
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 1,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              childAspectRatio: 4.0,
+            ),
+            itemCount: details.length,
+            itemBuilder: (context, index) {
+              final detail = details[index];
+              return Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: grey.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      detail['icon'] as IconData,
+                      color: primary,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          TextWidget(
+                            text: detail['label'].toString(),
+                            fontSize: 12,
+                            color: grey,
+                            fontFamily: 'Regular',
+                          ),
+                          TextWidget(
+                            text: detail['value'].toString(),
+                            fontSize: 14,
+                            color: black,
+                            fontFamily: 'Bold',
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
   }
 }

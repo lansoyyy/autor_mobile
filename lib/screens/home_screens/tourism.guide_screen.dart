@@ -1,3 +1,5 @@
+import 'package:autour_mobile/screens/home_screens/local.businesses_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:autour_mobile/utils/colors.dart';
 import 'package:autour_mobile/widgets/text_widget.dart';
@@ -517,44 +519,98 @@ class _SmartTourismGuideScreenState extends State<SmartTourismGuideScreen>
             fontFamily: 'Regular',
           ),
           const SizedBox(height: 20),
-          Expanded(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: FlutterMap(
-                options: MapOptions(
-                  center: LatLng(15.90, 121.65), // Aurora province center-ish
-                  zoom: 9.0,
-                ),
-                children: [
-                  TileLayer(
-                    urlTemplate:
-                        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                    userAgentPackageName: 'com.autour.mobile',
-                  ),
-                  MarkerLayer(
-                    markers: destinations
-                        .map(
-                          (d) => Marker(
-                            width: 45,
-                            height: 45,
-                            point:
-                                LatLng(d['lat'] as double, d['lng'] as double),
-                            builder: (context) => GestureDetector(
-                              onTap: () => _showDestinationDialog(d),
-                              child: Icon(
-                                Icons.location_on,
-                                color: primary,
-                                size: 40,
+          StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('businesses')
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  return Center(
+                    child: TextWidget(
+                      text: 'Failed to load businesses',
+                      fontSize: 14,
+                      color: grey,
+                      fontFamily: 'Regular',
+                    ),
+                  );
+                }
+
+                final docs = snapshot.data?.docs.where(
+                      (element) {
+                        return element['latitude'] != null;
+                      },
+                    ).toList() ??
+                    [];
+                return Expanded(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: FlutterMap(
+                      options: MapOptions(
+                        center:
+                            LatLng(15.90, 121.65), // Aurora province center-ish
+                        zoom: 9.0,
+                      ),
+                      children: [
+                        TileLayer(
+                          urlTemplate:
+                              'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                          userAgentPackageName: 'com.autour.mobile',
+                        ),
+                        MarkerLayer(
+                          markers: destinations
+                              .map(
+                                (d) => Marker(
+                                  width: 45,
+                                  height: 45,
+                                  point: LatLng(
+                                      d['lat'] as double, d['lng'] as double),
+                                  builder: (context) => GestureDetector(
+                                    onTap: () => _showDestinationDialog(d),
+                                    child: Icon(
+                                      Icons.location_on,
+                                      color: primary,
+                                      size: 40,
+                                    ),
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                        ),
+                        MarkerLayer(markers: [
+                          for (int i = 0; i < docs.length; i++)
+                            Marker(
+                              width: 45,
+                              height: 45,
+                              point: LatLng(docs[i]['latitude'],
+                                  docs[i]['longitude'] as double),
+                              builder: (context) => GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          BusinessDetailScreen(
+                                              business: docs[i].data()
+                                                  as Map<String, dynamic>),
+                                    ),
+                                  );
+                                },
+                                child: Icon(
+                                  Icons.location_on,
+                                  color: Colors.red,
+                                  size: 40,
+                                ),
                               ),
                             ),
-                          ),
-                        )
-                        .toList(),
+                        ]),
+                      ],
+                    ),
                   ),
-                ],
-              ),
-            ),
-          ),
+                );
+              }),
         ],
       ),
     );
@@ -1083,17 +1139,25 @@ class _SmartTourismGuideScreenState extends State<SmartTourismGuideScreen>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            Icon(activity['icon'], color: activity['color']),
-            const SizedBox(width: 8),
-            TextWidget(
-              text: activity['name'],
-              fontSize: 18,
-              color: black,
-              fontFamily: 'Bold',
-            ),
-          ],
+        title: SizedBox(
+          width: 300,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(activity['icon'], color: activity['color']),
+              const SizedBox(width: 8),
+              SizedBox(
+                width: 225,
+                child: TextWidget(
+                  text: activity['name'],
+                  fontSize: 18,
+                  color: black,
+                  maxLines: 3,
+                  fontFamily: 'Bold',
+                ),
+              ),
+            ],
+          ),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -1237,53 +1301,55 @@ class _SmartTourismGuideScreenState extends State<SmartTourismGuideScreen>
         ),
         content: Container(
           width: double.maxFinite,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: allAlerts.isEmpty
-                ? [
-                    TextWidget(
-                      text: 'No active alerts at the moment.',
-                      fontSize: 14,
-                      color: grey,
-                      fontFamily: 'Regular',
-                    ),
-                  ]
-                : allAlerts
-                    .map(
-                      (item) => Container(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.orange.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            TextWidget(
-                              text:
-                                  '${item['activity']} - ${item['alert']['type']}',
-                              fontSize: 12,
-                              color: black,
-                              fontFamily: 'Bold',
-                            ),
-                            TextWidget(
-                              text: item['alert']['message'],
-                              fontSize: 11,
-                              color: grey,
-                              fontFamily: 'Regular',
-                            ),
-                            TextWidget(
-                              text: item['alert']['time'],
-                              fontSize: 10,
-                              color: grey,
-                              fontFamily: 'Regular',
-                            ),
-                          ],
-                        ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: allAlerts.isEmpty
+                  ? [
+                      TextWidget(
+                        text: 'No active alerts at the moment.',
+                        fontSize: 14,
+                        color: grey,
+                        fontFamily: 'Regular',
                       ),
-                    )
-                    .toList(),
+                    ]
+                  : allAlerts
+                      .map(
+                        (item) => Container(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              TextWidget(
+                                text:
+                                    '${item['activity']} - ${item['alert']['type']}',
+                                fontSize: 12,
+                                color: black,
+                                fontFamily: 'Bold',
+                              ),
+                              TextWidget(
+                                text: item['alert']['message'],
+                                fontSize: 11,
+                                color: grey,
+                                fontFamily: 'Regular',
+                              ),
+                              TextWidget(
+                                text: item['alert']['time'],
+                                fontSize: 10,
+                                color: grey,
+                                fontFamily: 'Regular',
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                      .toList(),
+            ),
           ),
         ),
         actions: [

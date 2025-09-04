@@ -987,7 +987,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     _updateLocationOnce();
     // Then schedule every minute
     _locationTimer?.cancel();
-    _locationTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+    _locationTimer = Timer.periodic(const Duration(minutes: 1), (_) {
       _updateLocationOnce();
     });
   }
@@ -1034,12 +1034,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Future<void> _checkForNearbyAlerts(Position position) async {
     try {
       List<ActiveAlert> alerts = await AlertManager.checkForAlerts(position);
-      
+
       // Display alerts if any are found
       for (var alert in alerts) {
         // Use a small delay between alerts to prevent overlapping dialogs
         await Future.delayed(const Duration(milliseconds: 500));
-        
+
         // Show alert on the main thread
         if (_isMounted) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
