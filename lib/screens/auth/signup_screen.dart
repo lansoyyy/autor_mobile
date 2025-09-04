@@ -37,6 +37,7 @@ class _SignUpScreenState extends State<SignUpScreen>
 
   bool isObscure = true;
   bool _isLoading = false;
+  bool _privacyAccepted = false;
 
   late AnimationController _logoAnimationController;
   late AnimationController _formAnimationController;
@@ -123,6 +124,10 @@ class _SignUpScreenState extends State<SignUpScreen>
 
   Future<void> _handleSignUp() async {
     if (!_formKey.currentState!.validate()) return;
+
+    // Show privacy notice dialog before proceeding
+    final accepted = await _showPrivacyNoticeDialog();
+    if (!accepted) return;
 
     // Enforce location services and permission before proceeding
     final allow = await _requireLocationServiceAndPermission();
@@ -890,5 +895,86 @@ class _SignUpScreenState extends State<SignUpScreen>
         ),
       ),
     );
+  }
+
+  // Add this method to show the privacy notice dialog
+  Future<bool> _showPrivacyNoticeDialog() async {
+    return await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) {
+            return AlertDialog(
+              title: TextWidget(
+                text: 'Data Privacy Notice',
+                fontSize: 18,
+                color: black,
+                fontFamily: 'Bold',
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextWidget(
+                      text:
+                          'AuTour collects personal information to enhance your safety and travel experience. All data is gathered with your consent, stored securely, and used only for public safety, tourism services, and emergency response. We comply fully with the Data Privacy Act of 2012.',
+                      fontSize: 14,
+                      color: black,
+                      fontFamily: 'Regular',
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Checkbox(
+                          value: _privacyAccepted,
+                          onChanged: (value) {
+                            setState(() {
+                              _privacyAccepted = value ?? false;
+                            });
+                          },
+                        ),
+                        Expanded(
+                          child: TextWidget(
+                            text:
+                                'I have read and accept the Data Privacy Notice',
+                            fontSize: 14,
+                            color: black,
+                            fontFamily: 'Regular',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context, false);
+                  },
+                  child: TextWidget(
+                    text: 'Cancel',
+                    fontSize: 14,
+                    color: grey,
+                    fontFamily: 'Medium',
+                  ),
+                ),
+                TextButton(
+                  onPressed: _privacyAccepted
+                      ? () {
+                          Navigator.pop(context, true);
+                        }
+                      : null,
+                  child: TextWidget(
+                    text: 'Accept',
+                    fontSize: 14,
+                    color: _privacyAccepted ? primary : grey,
+                    fontFamily: 'Bold',
+                  ),
+                ),
+              ],
+            );
+          },
+        ) ??
+        false;
   }
 }
