@@ -336,12 +336,8 @@ class AlertManager {
         double radius = _getRadiusForDestination(destination);
 
         // Check if user is within radius of this destination
-        if (LocationUtils.isWithinRadius(
-            position.latitude,
-            position.longitude,
-            destination.latitude,
-            destination.longitude,
-            radius)) {
+        if (LocationUtils.isWithinRadius(position.latitude, position.longitude,
+            destination.latitude, destination.longitude, radius)) {
           // Find activities associated with this destination
           for (var activity in activities) {
             // Check if this destination is in the activity's locations
@@ -353,10 +349,11 @@ class AlertManager {
           }
         }
       }
-      
+
       // Check for weather-based alerts
-      List<ActiveAlert> weatherAlerts = await WeatherService.checkWeatherAlerts(position, activities);
-      nearbyAlerts.addAll(weatherAlerts);
+      List<ActiveAlert> weatherAlerts =
+          await WeatherService.checkWeatherAlerts(position, activities);
+      nearbyAlerts.add(weatherAlerts.first);
     } catch (e) {
       // Log error in a production environment
       // For now, we'll just return an empty list
@@ -423,7 +420,8 @@ class AlertManager {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: _getColorForSeverity(alert.severity).withOpacity(0.1),
+                        color: _getColorForSeverity(alert.severity)
+                            .withOpacity(0.1),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
                           color: _getColorForSeverity(alert.severity),
@@ -491,7 +489,8 @@ class AlertManager {
       if (await Vibration.hasVibrator() != true) return;
 
       // Check if custom vibrations are available
-      bool hasCustomVibration = await Vibration.hasCustomVibrationsSupport() == true;
+      bool hasCustomVibration =
+          await Vibration.hasCustomVibrationsSupport() == true;
 
       switch (severity.toLowerCase()) {
         case 'high':

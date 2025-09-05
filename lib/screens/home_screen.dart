@@ -27,6 +27,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:autour_mobile/screens/home_screens/emergency_hotlines_screen.dart';
 import 'package:autour_mobile/utils/alert_manager.dart';
 import 'package:autour_mobile/utils/alert_models.dart';
+import 'package:autour_mobile/screens/admin_populate_data_screen.dart'; // Added for admin data population
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -139,6 +140,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
               if (snapshot.hasData && !snapshot.data!.exists) {
                 return Text("Document does not exist");
+              }
+
+              if (!snapshot.hasData) {
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
               }
               Map<String, dynamic> data =
                   snapshot.data!.data() as Map<String, dynamic>;
@@ -554,6 +561,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         'screen': const CommonDialectsScreen(),
         'color': Colors.amber,
       },
+      // Admin option for data population
+      // {
+      //   'title': 'Admin Data Populate',
+      //   'description': 'Populate Firebase with travel data',
+      //   'icon': Icons.admin_panel_settings_outlined,
+      //   'screen': const AdminPopulateDataScreen(),
+      //   'color': Colors.grey,
+      // },
     ];
 
     return GridView.builder(
